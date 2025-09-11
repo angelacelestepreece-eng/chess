@@ -29,4 +29,8 @@ public class ChessPosition {
     public int getColumn() {
         return column;
     }
+
+    public static boolean invalidPosition(int row, int col) {
+        return row < 1 || row > 8 || col < 1 || col > 8;
+    }
 }
