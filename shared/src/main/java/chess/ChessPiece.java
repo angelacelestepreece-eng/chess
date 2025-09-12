@@ -78,6 +78,15 @@ public class ChessPiece {
                     break;
                 }
                 ChessPosition newPosition = new ChessPosition(row, col);
+                ChessPiece otherPiece = board.getPiece(newPosition);
+
+                if (otherPiece != null && otherPiece.getTeamColor() == piece.getTeamColor()){
+                    break;
+                }
+                if (otherPiece != null && otherPiece.getTeamColor() != piece.getTeamColor()){
+                    bishopMoves.add(new ChessMove(myPosition, newPosition, null));
+                    break;
+                }
                 bishopMoves.add(new ChessMove(myPosition, newPosition, null));
             }
         }
