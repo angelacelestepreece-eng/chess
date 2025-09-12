@@ -56,41 +56,72 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        int originalRow = myPosition.getRow();
-        int originalCol = myPosition.getColumn();
 
-        //I'm just testing Bishop Moves
-        if (piece == null || piece.getPieceType() != ChessPiece.PieceType.BISHOP){
-            return new HashSet<ChessMove>();
+        //I'm just testing Bishop Moves & Rook Moves
+        if (piece == null || piece.getPieceType() != ChessPiece.PieceType.BISHOP && piece.getPieceType() != ChessPiece.PieceType.ROOK) {
+            return new ArrayList<>();
         }
 
-        Collection<ChessMove> bishopMoves = new ArrayList<>();
-        int[][] bishop_movement = {{1,1}, {-1,1}, {-1,-1},{1,-1}};
-        for (int[] move:bishop_movement) {
-            int row = myPosition.getRow();
-            int col = myPosition.getColumn();
+        Collection<ChessMove> moves = new ArrayList<>();
+        int[][] bishop_movement = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+        int[][] rook_movement = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
 
-            while (true){
-                row += move[0];
-                col += move[1];
+        //find Bishop moves
+        if (ChessPiece.PieceType.BISHOP == piece.getPieceType()) {
+            for (int[] move : bishop_movement) {
+                int row = myPosition.getRow();
+                int col = myPosition.getColumn();
 
-                if (ChessPosition.invalidPosition(row, col)){
-                    break;
-                }
-                ChessPosition newPosition = new ChessPosition(row, col);
-                ChessPiece otherPiece = board.getPiece(newPosition);
+                while (true) {
+                    row += move[0];
+                    col += move[1];
 
-                if (otherPiece != null && otherPiece.getTeamColor() == piece.getTeamColor()){
-                    break;
+                    if (ChessPosition.invalidPosition(row, col)) {
+                        break;
+                    }
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    ChessPiece otherPiece = board.getPiece(newPosition);
+
+                    if (otherPiece != null && otherPiece.getTeamColor() == piece.getTeamColor()) {
+                        break;
+                    }
+                    if (otherPiece != null && otherPiece.getTeamColor() != piece.getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, newPosition, null));
+                        break;
+                    }
+                    moves.add(new ChessMove(myPosition, newPosition, null));
                 }
-                if (otherPiece != null && otherPiece.getTeamColor() != piece.getTeamColor()){
-                    bishopMoves.add(new ChessMove(myPosition, newPosition, null));
-                    break;
-                }
-                bishopMoves.add(new ChessMove(myPosition, newPosition, null));
             }
         }
 
-        return bishopMoves;
+        //find Rook moves
+        if (ChessPiece.PieceType.ROOK == piece.getPieceType()){
+            for (int[] move : rook_movement) {
+                int row = myPosition.getRow();
+                int col = myPosition.getColumn();
+
+                while (true) {
+                    row += move[0];
+                    col += move[1];
+
+                    if (ChessPosition.invalidPosition(row, col)) {
+                        break;
+                    }
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    ChessPiece otherPiece = board.getPiece(newPosition);
+
+                    if (otherPiece != null && otherPiece.getTeamColor() == piece.getTeamColor()) {
+                        break;
+                    }
+                    if (otherPiece != null && otherPiece.getTeamColor() != piece.getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, newPosition, null));
+                        break;
+                    }
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                }
+            }
+        }
+
+        return moves;
     }
 }
