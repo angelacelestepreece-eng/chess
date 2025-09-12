@@ -40,37 +40,8 @@ public class ChessMove {
      */
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
-
-
     }
 
-    public boolean validMove(ChessPiece piece, int row, int col, int newRow, int newCol) {
-//        if (piece.pieceType == ChessPiece.PieceType.KING){
-//            return kingValidMove(row, col, newRow, newCol);
-//        }
-//        if (piece.pieceType == ChessPiece.PieceType.QUEEN){
-//            return queenValidMove(row, col, newRow, newCol);
-//        }
-        if (piece.getPieceType() == ChessPiece.PieceType.BISHOP){
-            return isBishopValidMove(row, col, newRow, newCol);
-        }
-//        if (piece.pieceType == ChessPiece.PieceType.ROOK){
-//            return rookValidMove(row, col, newRow, newCol);
-//        }
-//        if (piece.pieceType == ChessPiece.PieceType.PAWN){
-//            return pawnValidMove(row, col, newRow, newCol);
-//        }
-        else{
-            return false;
-        }
-    }
-
-    public boolean isBishopValidMove(int row, int col, int newRow, int newCol){
-        if (chess.ChessPosition.invalidPosition(newRow, newCol)){
-            return false;
-        }
-        return Math.abs(col - newCol) == Math.abs(row - newRow);
-    }
 
     @Override
     public boolean equals(Object o) {

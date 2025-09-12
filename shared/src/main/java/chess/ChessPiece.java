@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  * Represents a single chess piece
@@ -54,6 +55,33 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new HashSet<ChessMove>();
+        ChessPiece piece = board.getPiece(myPosition);
+        int originalRow = myPosition.getRow();
+        int originalCol = myPosition.getColumn();
+
+        //I'm just testing Bishop Moves
+        if (piece == null || piece.getPieceType() != ChessPiece.PieceType.BISHOP){
+            return new HashSet<ChessMove>();
+        }
+
+        Collection<ChessMove> bishopMoves = new ArrayList<>();
+        int[][] bishop_movement = {{1,1}, {-1,1}, {-1,-1},{1,-1}};
+        for (int[] move:bishop_movement) {
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+
+            while (true){
+                row += move[0];
+                col += move[1];
+
+                if (ChessPosition.invalidPosition(row, col)){
+                    break;
+                }
+                ChessPosition newPosition = new ChessPosition(row, col);
+                bishopMoves.add(new ChessMove(myPosition, newPosition, null));
+            }
+        }
+
+        return bishopMoves;
     }
 }

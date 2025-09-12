@@ -11,7 +11,8 @@ public class ChessPosition {
     private int column;
 
     public ChessPosition(int row, int col) {
-
+        this.row = row;
+        this.column = col;
     }
 
     /**
@@ -33,4 +34,23 @@ public class ChessPosition {
     public static boolean invalidPosition(int row, int col) {
         return row < 1 || row > 8 || col < 1 || col > 8;
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%d,%d)", row, column);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPosition position = (ChessPosition) o;
+        return row == position.row && column == position.column;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * row + column;
+    }
+
 }
