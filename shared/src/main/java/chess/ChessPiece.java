@@ -57,8 +57,8 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
 
-        //I'm just testing Bishop Moves & Rook Moves & Queen Moves
-        if (piece == null || piece.getPieceType() != ChessPiece.PieceType.BISHOP && piece.getPieceType() != ChessPiece.PieceType.ROOK && piece.getPieceType() != ChessPiece.PieceType.QUEEN) {
+        //I'm just testing Bishop Moves & Rook Moves & Queen Moves & King Moves
+        if (piece == null || piece.getPieceType() != ChessPiece.PieceType.BISHOP && piece.getPieceType() != ChessPiece.PieceType.ROOK && piece.getPieceType() != ChessPiece.PieceType.QUEEN && piece.getPieceType() != ChessPiece.PieceType.KING) {
             return new ArrayList<>();
         }
 
@@ -66,6 +66,7 @@ public class ChessPiece {
         int[][] bishop_movement = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
         int[][] rook_movement = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
         int[][] queen_movement = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {0, -1}, {-1, 0}, {0, 1}};
+        int[][] king_movement = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {0, -1}, {-1, 0}, {0, 1}};
 
         //find Bishop moves
         if (ChessPiece.PieceType.BISHOP == piece.getPieceType()) {
@@ -148,6 +149,32 @@ public class ChessPiece {
                     }
                     moves.add(new ChessMove(myPosition, newPosition, null));
                 }
+            }
+        }
+
+        //find King moves
+        if (ChessPiece.PieceType.KING == piece.getPieceType()) {
+            for (int[] move : king_movement) {
+                int row = myPosition.getRow();
+                int col = myPosition.getColumn();
+
+                row += move[0];
+                col += move[1];
+
+                if (ChessPosition.invalidPosition(row, col)) {
+                    continue;
+                }
+                ChessPosition newPosition = new ChessPosition(row, col);
+                ChessPiece otherPiece = board.getPiece(newPosition);
+
+                if (otherPiece != null && otherPiece.getTeamColor() == piece.getTeamColor()) {
+                    continue;
+                }
+                if (otherPiece != null && otherPiece.getTeamColor() != piece.getTeamColor()) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                    continue;
+                }
+                moves.add(new ChessMove(myPosition, newPosition, null));
             }
         }
 
