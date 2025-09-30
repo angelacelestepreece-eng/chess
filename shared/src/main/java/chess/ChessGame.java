@@ -9,16 +9,18 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    private ChessBoard board;
+    private TeamColor teamTurn;
 
     public ChessGame() {
-
+        this.board = new ChessBoard();
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -27,7 +29,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        teamTurn = team;
     }
 
     /**
@@ -46,7 +48,8 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece myPiece = board.getPiece(startPosition);
+        return myPiece.pieceMoves(board, startPosition);
     }
 
     /**
@@ -96,7 +99,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
@@ -105,10 +108,27 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return board;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if(o==this)return true;
+        if(o==null || getClass() != o.getClass()) return false;
+        ChessGame that = (ChessGame) o;
+        if(board == null && that.board == null)return true;
+        if(board == null || that.board == null)return false;
+        return board.equals(that.board);
+    }
 
+    @Override
+    public String toString() {
+        return String.format("ChessGame: %s",(board==null? "" : board.toString()));
+    }
 
+    @Override
+    public int hashCode() {
+        return 31 * (board==null? 0 : board.hashCode());
+    }
 
 }
