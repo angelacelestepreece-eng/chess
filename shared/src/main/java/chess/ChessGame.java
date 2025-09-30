@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -30,6 +32,15 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         teamTurn = team;
+    }
+
+    public TeamColor opponentTeam(TeamColor color){
+        if(color == TeamColor.BLACK){
+            return TeamColor.WHITE;
+        }
+        else{
+            return TeamColor.BLACK;
+        }
     }
 
     /**
@@ -68,6 +79,7 @@ public class ChessGame {
             board.addPiece(endPosition, new ChessPiece(piece.getTeamColor(), promotionPiece));
         }
         board.addPiece(endPosition, piece);
+        setTeamTurn(opponentTeam(piece.getTeamColor()));
     }
 
     /**
@@ -77,7 +89,19 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ArrayList<ChessPosition> kingPosition = ChessPiece.findPiecePositionsForTeam(ChessPiece.PieceType.KING, board, teamColor);
+
+        ArrayList<ChessPosition> opponentPieces = ChessPiece.findTeamPositions(board, teamColor);
+        for (ChessPosition pos : opponentPieces){
+            ChessPiece piece = board.getPiece(pos);
+            Collection<ChessMove> moves = piece.pieceMoves(board, pos);
+            for (ChessMove move : moves){
+                if(move.getEndPosition().equals(kingPosition.getFirst())){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

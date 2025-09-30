@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -67,6 +68,34 @@ public class ChessPiece {
 
         return rule != null ? rule.getMoves(board, myPosition) : new HashSet<>();
 
+    }
+
+    //returns all positions of a specified piece
+    public static ArrayList<ChessPosition> findTeamPositions(ChessBoard board, ChessGame.TeamColor color){
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+
+        for(int row = 1; row <= 8; row ++){
+            for(int col = 1; col <= 8; col++){
+                ChessPosition pos = new ChessPosition(row,col);
+                ChessPiece currPiece = board.getPiece(pos);
+
+                if(currPiece != null && currPiece.getTeamColor() == color){
+                    positions.add(pos);
+                }
+            }
+        }
+        return positions;
+    }
+
+    public static ArrayList<ChessPosition> findPiecePositionsForTeam(ChessPiece.PieceType pieceType, ChessBoard board, ChessGame.TeamColor color){
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+        ArrayList<ChessPosition> allPositions = findTeamPositions(board, color);
+        for (ChessPosition pos : allPositions){
+            if (board.getPiece(pos).getPieceType() == pieceType){
+                positions.add(pos);
+            }
+        }
+        return positions;
     }
 
     @Override
