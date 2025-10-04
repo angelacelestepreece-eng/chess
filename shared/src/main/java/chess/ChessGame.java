@@ -61,35 +61,15 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-//        Collection<ChessPosition> teamPositions = ChessPiece.findTeamPositions(board, board.getPiece(startPosition).getTeamColor());
-//        Collection<ChessMove> allMoves = new ArrayList<>();
-//        for(ChessPosition pos : teamPositions) {
-//            allMoves.addAll((board.getPiece(pos)).pieceMoves(board, pos));
-//        }
-//
-//        Collection<ChessMove> validMoves = new ArrayList<>();
-//        for(ChessMove move : allMoves){
-//            try {
-//                ChessBoard newBoard = board.copy();
-//                makeMove(move);
-//                if (!isInCheck(newBoard.getPiece(startPosition).getTeamColor())) {
-//                    validMoves.add(move);
-//                }
-//            } catch (InvalidMoveException e){};
-//        }
-//        return validMoves;
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null) return null;
-
         TeamColor team = piece.getTeamColor();
         Collection<ChessMove> allMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         for (ChessMove move : allMoves) {
             ChessPosition end = move.getEndPosition();
-            ChessPiece captured = board.getPiece(end);
-
-            // Simulate move
+            ChessPiece newPiece = board.getPiece(end);
             board.removePiece(startPosition);
             board.removePiece(end);
             if (move.getPromotionPiece() != null) {
@@ -97,16 +77,13 @@ public class ChessGame {
             } else {
                 board.addPiece(end, piece);
             }
-
-            boolean safe = !isInCheck(team);
-            // Undo move
+            boolean notInCheck = !isInCheck(team);
             board.removePiece(end);
             board.addPiece(startPosition, piece);
-            if (captured != null) {
-                board.addPiece(end, captured);
+            if (newPiece != null) {
+                board.addPiece(end, newPiece);
             }
-
-            if (safe) {
+            if (notInCheck) {
                 validMoves.add(move);
             }
         }
