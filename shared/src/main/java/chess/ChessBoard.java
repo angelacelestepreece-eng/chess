@@ -8,7 +8,7 @@ package chess;
  */
 public class ChessBoard {
 
-    final private ChessPiece[][] board = new ChessPiece[8][8];
+    private ChessPiece[][] board = new ChessPiece[8][8];
     public ChessBoard() {
         
     }
@@ -65,6 +65,19 @@ public class ChessBoard {
             addPiece(new ChessPosition(1, col), new ChessPiece(ChessGame.TeamColor.WHITE, order[col - 1]));
             addPiece(new ChessPosition(8, col), new ChessPiece(ChessGame.TeamColor.BLACK, order[col - 1]));
         }
+    }
+
+    public ChessBoard copy() {
+        ChessBoard copy = new ChessBoard();
+        copy.board = new ChessPiece[8][8];
+
+        for(int row = 0; row < 8; row++){
+            for(int col = 0; col<8; col++){
+                ChessPiece orig = this.board[row][col];
+                copy.board[row][col] = (orig != null) ? orig.copy() : null;
+            }
+        }
+        return copy;
     }
 
 

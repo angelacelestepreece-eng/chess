@@ -70,7 +70,6 @@ public class ChessPiece {
 
     }
 
-    //returns all positions of a specified piece
     public static ArrayList<ChessPosition> findTeamPositions(ChessBoard board, ChessGame.TeamColor color){
         ArrayList<ChessPosition> positions = new ArrayList<>();
 
@@ -96,6 +95,10 @@ public class ChessPiece {
             }
         }
         return positions;
+    }
+
+    public ChessPiece copy() {
+        return new ChessPiece(this.pieceColor, this.type);
     }
 
     @Override
