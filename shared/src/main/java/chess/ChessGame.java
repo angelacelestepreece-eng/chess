@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -68,21 +67,25 @@ public class ChessGame {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         for (ChessMove move : allMoves) {
-            ChessPosition end = move.getEndPosition();
-            ChessPiece newPiece = board.getPiece(end);
-            movePiece(startPosition, end, move, piece);
-            boolean notInCheck = !isInCheck(team);
-            board.removePiece(end);
-            board.addPiece(startPosition, piece);
-            if (newPiece != null) {
-                board.addPiece(end, newPiece);
-            }
-            if (notInCheck) {
-                validMoves.add(move);
-            }
+            testMove(startPosition, move, piece, validMoves, team);
         }
 
         return validMoves;
+    }
+
+    public void testMove(ChessPosition startPosition, ChessMove move, ChessPiece piece, Collection<ChessMove> validMoves, TeamColor team){
+        ChessPosition end = move.getEndPosition();
+        ChessPiece newPiece = board.getPiece(end);
+        movePiece(startPosition, end, move, piece);
+        boolean notInCheck = !isInCheck(team);
+        board.removePiece(end);
+        board.addPiece(startPosition, piece);
+        if (newPiece != null) {
+            board.addPiece(end, newPiece);
+        }
+        if (notInCheck) {
+            validMoves.add(move);
+        }
     }
 
     public void movePiece(ChessPosition startPosition, ChessPosition endPosition, ChessMove move, ChessPiece piece){
