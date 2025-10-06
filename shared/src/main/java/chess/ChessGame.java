@@ -70,13 +70,7 @@ public class ChessGame {
         for (ChessMove move : allMoves) {
             ChessPosition end = move.getEndPosition();
             ChessPiece newPiece = board.getPiece(end);
-            board.removePiece(startPosition);
-            board.removePiece(end);
-            if (move.getPromotionPiece() != null) {
-                board.addPiece(end, new ChessPiece(team, move.getPromotionPiece()));
-            } else {
-                board.addPiece(end, piece);
-            }
+            movePiece(startPosition, end, move, piece);
             boolean notInCheck = !isInCheck(team);
             board.removePiece(end);
             board.addPiece(startPosition, piece);
@@ -89,6 +83,19 @@ public class ChessGame {
         }
 
         return validMoves;
+    }
+
+    public void movePiece(ChessPosition startPosition, ChessPosition endPosition, ChessMove move, ChessPiece piece){
+        board.removePiece(startPosition);
+        board.removePiece(endPosition);
+
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+        if (promotionPiece != null) {
+            board.addPiece(endPosition, new ChessPiece(piece.getTeamColor(), promotionPiece));
+        }
+        else{
+            board.addPiece(endPosition, piece);
+        }
     }
 
     /**
@@ -110,18 +117,9 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
+        movePiece(startPosition, endPosition, move, piece);
+
         ChessPiece captured = board.getPiece(endPosition);
-        board.removePiece(startPosition);
-        board.removePiece(endPosition);
-
-        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
-        if (promotionPiece != null) {
-            board.addPiece(endPosition, new ChessPiece(piece.getTeamColor(), promotionPiece));
-        }
-        else{
-            board.addPiece(endPosition, piece);
-        }
-
         if(isInCheck(piece.getTeamColor())){
             board.removePiece(endPosition);
             board.addPiece(startPosition,piece);
