@@ -1,12 +1,10 @@
 package server;
 
 import com.google.gson.Gson;
-import datamodel.User;
 import io.javalin.*;
 import io.javalin.http.Context;
+import model.UserData;
 import service.UserService;
-
-import java.util.Map;
 
 public class Server {
 
@@ -23,7 +21,7 @@ public class Server {
 
     private void register(Context ctx) {
         var serializer = new Gson();
-        var req = serializer.fromJson(ctx.body(), User.class);
+        var req = serializer.fromJson(ctx.body(), UserData.class);
 
         var res = userService.register(req);
         ctx.result(serializer.toJson(res));

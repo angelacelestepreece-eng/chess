@@ -1,11 +1,11 @@
 package service;
 
 import datamodel.RegistrationResult;
-import datamodel.User;
+import model.UserData;
 
 
 public class UserService {
-    public RegistrationResult register(User user) {
+    public RegistrationResult register(UserData user) {
         return new RegistrationResult(user.username(), "zzzy");
     }
 }
