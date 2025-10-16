@@ -1,10 +1,14 @@
 package server;
 
 import com.google.gson.Gson;
+import datamodel.ErrorMessage;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
+import service.ServiceException;
 import service.UserService;
+
+import java.security.Provider;
 
 public class Server {
 
@@ -21,10 +25,15 @@ public class Server {
 
     private void register(Context ctx) {
         var serializer = new Gson();
-        var req = serializer.fromJson(ctx.body(), UserData.class);
-
-        var res = userService.register(req);
-        ctx.result(serializer.toJson(res));
+        try {
+            var req = serializer.fromJson(ctx.body(), UserData.class);
+            var res = userService.register(req);
+            ctx.status(200).result(serializer.toJson(res));
+        } catch (ServiceException e) {
+            ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        } catch (Exception e) {
+            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        }
     }
 
     public int run(int desiredPort) {
