@@ -13,7 +13,8 @@ public class UserService {
     private final DataAccess dataAccess = new MemoryDataAccess();
 
     public RegistrationResult register(UserData user) throws ServiceException {
-        if (user.username() == null || user.password() == null || user.email() == null) {
+        if (user.username() == null || user.password() == null || user.email() == null ||
+                user.username().isBlank() || user.password().isBlank() || user.email().isBlank()) {
             throw new ServiceException(400, "Error: bad request");
         }
 
