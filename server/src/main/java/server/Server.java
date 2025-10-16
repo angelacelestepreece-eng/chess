@@ -20,6 +20,7 @@ public class Server {
 
         server.delete("db", ctx -> ctx.result("{}"));
         server.post("user", this::register);
+        server.post("session", this::login);
 
     }
 
@@ -28,6 +29,19 @@ public class Server {
         try {
             var req = serializer.fromJson(ctx.body(), UserData.class);
             var res = userService.register(req);
+            ctx.status(200).result(serializer.toJson(res));
+        } catch (ServiceException e) {
+            ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        } catch (Exception e) {
+            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        }
+    }
+
+    private void login(Context ctx) {
+        var serializer = new Gson();
+        try {
+            var req = serializer.fromJson(ctx.body(), UserData.class);
+            var res = userService.login(req);
             ctx.status(200).result(serializer.toJson(res));
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));

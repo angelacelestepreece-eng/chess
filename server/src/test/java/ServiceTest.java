@@ -15,4 +15,13 @@ public class ServiceTest {
         var res = userService.register(new UserData("dog", "cat", "fish"));
         Assertions.assertNotNull(res);
     }
+
+    @Test
+    public void clearNormal() throws ServiceException {
+        var dataAccess = new MemoryDataAccess();
+        var userService = new UserService();
+
+        var res = userService.register(new UserData("dog", "cat", "fish"));
+        Assertions.assertNotNull(res);
+    }
 }
