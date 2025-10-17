@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import datamodel.ErrorMessage;
 import io.javalin.*;
 import io.javalin.http.Context;
+import model.AuthData;
 import model.UserData;
 import service.ServiceException;
 import service.UserService;
@@ -18,9 +19,13 @@ public class Server {
     public Server() {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        server.delete("db", ctx -> ctx.result("{}"));
+        server.delete("db", ctx -> {
+            userService.clear();
+            ctx.status(200).result("{}");
+        });
         server.post("user", this::register);
         server.post("session", this::login);
+        server.delete("session", this::logout);
 
     }
 
@@ -43,6 +48,19 @@ public class Server {
             var req = serializer.fromJson(ctx.body(), UserData.class);
             var res = userService.login(req);
             ctx.status(200).result(serializer.toJson(res));
+        } catch (ServiceException e) {
+            ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        } catch (Exception e) {
+            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        }
+    }
+
+    private void logout(Context ctx) {
+        var serializer = new Gson();
+        try {
+            var authToken = ctx.header("authorization");
+            userService.logout(authToken);
+            ctx.status(200).result("{}");
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
         } catch (Exception e) {

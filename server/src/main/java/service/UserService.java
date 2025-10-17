@@ -24,8 +24,7 @@ public class UserService {
         }
 
         dataAccess.createUser(user);
-        dataAccess.createAuth(user);
-        AuthData auth = dataAccess.getAuth(user.username());
+        AuthData auth = dataAccess.createAuth(user);
         return new RegistrationResult(auth.username(), auth.authToken());
     }
 
@@ -44,11 +43,21 @@ public class UserService {
         if (!user.password().equals(registeredUser.password())) {
             throw new ServiceException(401, "Error: unauthorized");
         }
-        dataAccess.createAuth(user);
-        return dataAccess.getAuth(user.username());
+        return dataAccess.createAuth(user);
     }
 
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
+    public void logout(String authToken) throws ServiceException {
+        AuthData authData = dataAccess.getAuth(authToken);
+
+        if (authData == null) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+
+        dataAccess.deleteAuth(authToken);
+
+    }
+
+    public void clear() {
+        dataAccess.clear();
     }
 }

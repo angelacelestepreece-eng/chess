@@ -2,6 +2,7 @@ package dataAccess;
 
 import model.AuthData;
 import model.UserData;
+import service.ServiceException;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -17,7 +18,8 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void clear() {
-
+        users.clear();
+        auths.clear();
     }
 
     @Override
@@ -31,15 +33,21 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createAuth(UserData user) {
+    public AuthData createAuth(UserData user) {
         String authToken = generateToken();
         AuthData auth = new AuthData(user.username(), authToken);
-        auths.put(user.username(), auth);
+        auths.put(authToken, auth);
+        return auth;
     }
 
     @Override
-    public AuthData getAuth(String username) {
-        return auths.get(username);
+    public AuthData getAuth(String authToken) {
+        return auths.get(authToken);
+    }
+
+    @Override
+    public void deleteAuth(String authToken) {
+        auths.remove(authToken);
     }
 
     public static String generateToken() {
