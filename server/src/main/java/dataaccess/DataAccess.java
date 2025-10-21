@@ -1,7 +1,10 @@
 package dataAccess;
 
 import model.AuthData;
+import model.GameData;
 import model.UserData;
+
+import java.util.Collection;
 
 public interface DataAccess {
     void clear();
@@ -15,4 +18,8 @@ public interface DataAccess {
     AuthData getAuth(String auth);
 
     void deleteAuth(String authToken);
+
+    Collection<GameData> getGames();
+
+    GameData createGame(String gameName);
 }

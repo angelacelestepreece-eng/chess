@@ -1,12 +1,15 @@
 package service;
 
+import chess.ChessGame;
 import dataAccess.DataAccess;
 import dataAccess.MemoryDataAccess;
 import dataAccess.DataAccessException;
 import datamodel.RegistrationResult;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
+import java.util.Collection;
 import java.util.UUID;
 
 
@@ -55,6 +58,32 @@ public class UserService {
 
         dataAccess.deleteAuth(authToken);
 
+    }
+
+    public Collection<GameData> listGames(String authToken) throws ServiceException {
+        if (authToken == null || authToken.isBlank()) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+        AuthData authData = dataAccess.getAuth(authToken);
+        if (authData == null) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+        return dataAccess.getGames();
+    }
+
+    public int createGame(String gameName, String authToken) throws ServiceException {
+        if (gameName == null || gameName.isBlank()) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+        if (authToken == null || authToken.isBlank()) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+        AuthData authData = dataAccess.getAuth(authToken);
+        if (authData == null) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+        GameData gameData = dataAccess.createGame(gameName);
+        return gameData.gameID();
     }
 
     public void clear() {

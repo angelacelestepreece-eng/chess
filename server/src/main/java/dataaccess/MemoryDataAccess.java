@@ -1,15 +1,19 @@
 package dataAccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import service.ServiceException;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class MemoryDataAccess implements DataAccess {
     private HashMap<String, UserData> users = new HashMap<>();
     private HashMap<String, AuthData> auths = new HashMap<>();
+    private HashMap<Integer, GameData> games = new HashMap<>();
 
 
     public void saveUser(UserData user) {
@@ -51,6 +55,27 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     public static String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public Collection<GameData> getGames() {
+        return games.values();
+    }
+
+    @Override
+    public GameData createGame(String gameName) {
+        int newGameID = 1234;
+        GameData gameData = new GameData(newGameID, null, null, gameName, new ChessGame());
+        saveGame(gameData);
+        return gameData;
+    }
+
+    public void saveGame(GameData game) {
+        games.put(game.gameID(), game);
+    }
+
+    public static String generateUniqueGameID() {
         return UUID.randomUUID().toString();
     }
 
