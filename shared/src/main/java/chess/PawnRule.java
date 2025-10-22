@@ -20,21 +20,27 @@ public class PawnRule implements Rule {
 
 
         //one move forward
-        if (!ChessPosition.invalidPosition(row + dir, col) && board.getPiece(forward1) == null) {
+        if (!ChessPosition.invalidPosition(row + dir, col) &&
+                board.getPiece(forward1) == null) {
             getPawnMoves(moves, myPosition, forward1);
 
             //two moves forward
-            if (!ChessPosition.invalidPosition(row + dir * 2, col) && board.getPiece(forward2) == null && row == startRow) {
+            if (!ChessPosition.invalidPosition(row + dir * 2, col) &&
+                    board.getPiece(forward2) == null && row == startRow) {
                 getPawnMoves(moves, myPosition, forward2);
             }
         }
 
         //capture enemy
-        if (!ChessPosition.invalidPosition(row + dir, col + 1) && board.getPiece(diag1) != null && (board.getPiece(diag1)).getTeamColor() != piece.getTeamColor()) {
+        if (!ChessPosition.invalidPosition(row + dir, col + 1) &&
+                board.getPiece(diag1) != null &&
+                (board.getPiece(diag1)).getTeamColor() != piece.getTeamColor()) {
             getPawnMoves(moves, myPosition, diag1);
         }
 
-        if (!ChessPosition.invalidPosition(row + dir, col - 1) && board.getPiece(diag2) != null && (board.getPiece(diag2)).getTeamColor() != piece.getTeamColor()) {
+        if (!ChessPosition.invalidPosition(row + dir, col - 1) &&
+                board.getPiece(diag2) != null &&
+                (board.getPiece(diag2)).getTeamColor() != piece.getTeamColor()) {
             getPawnMoves(moves, myPosition, diag2);
         }
 

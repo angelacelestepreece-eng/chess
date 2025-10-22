@@ -87,10 +87,6 @@ public class ChessPiece {
 
     }
 
-    public ChessPiece copy() {
-        return new ChessPiece(this.pieceColor, this.type);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
