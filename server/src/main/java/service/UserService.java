@@ -86,6 +86,41 @@ public class UserService {
         return gameData.gameID();
     }
 
+    public void joinGame(String authToken, String playerColor, int gameID) throws ServiceException {
+        if (authToken == null || authToken.isBlank() || playerColor == null || playerColor.isBlank()) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+        AuthData authData = dataAccess.getAuth(authToken);
+        if (authData == null) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+        GameData game = dataAccess.getGame(gameID);
+        if (game == null) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+
+        String username = authData.username();
+        GameData updatedGame;
+
+        switch (playerColor.toLowerCase()) {
+            case "white" -> {
+                if (game.whiteUsername() != null) {
+                    throw new ServiceException(403, "Error: already taken");
+                }
+                updatedGame = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
+            }
+            case "black" -> {
+                if (game.blackUsername() != null) {
+                    throw new ServiceException(403, "Error: already taken");
+                }
+                updatedGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
+            }
+            default -> throw new ServiceException(400, "Error: bad request");
+        }
+
+        dataAccess.saveGame(updatedGame);
+    }
+
     public void clear() {
         dataAccess.clear();
     }

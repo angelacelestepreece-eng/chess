@@ -22,4 +22,8 @@ public interface DataAccess {
     Collection<GameData> getGames();
 
     GameData createGame(String gameName);
+
+    void saveGame(GameData game);
+
+    GameData getGame(int gameID);
 }

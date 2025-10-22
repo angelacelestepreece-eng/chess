@@ -9,6 +9,7 @@ import service.ServiceException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MemoryDataAccess implements DataAccess {
     private HashMap<String, UserData> users = new HashMap<>();
@@ -24,6 +25,7 @@ public class MemoryDataAccess implements DataAccess {
     public void clear() {
         users.clear();
         auths.clear();
+        games.clear();
     }
 
     @Override
@@ -65,15 +67,23 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public GameData createGame(String gameName) {
-        int newGameID = 1234;
+        int newGameID = gameCounter.getAndIncrement();
         GameData gameData = new GameData(newGameID, null, null, gameName, new ChessGame());
         saveGame(gameData);
         return gameData;
     }
 
+    @Override
     public void saveGame(GameData game) {
         games.put(game.gameID(), game);
     }
+
+    @Override
+    public GameData getGame(int gameID) {
+        return games.get(gameID);
+    }
+
+    private final AtomicInteger gameCounter = new AtomicInteger(1);
 
     public static String generateUniqueGameID() {
         return UUID.randomUUID().toString();

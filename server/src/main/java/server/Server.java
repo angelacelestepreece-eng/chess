@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import datamodel.CreateGameRequest;
 import datamodel.ErrorMessage;
+import datamodel.JoinGameRequest;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
@@ -12,6 +13,7 @@ import service.ServiceException;
 import service.UserService;
 
 import java.security.Provider;
+import java.util.Collection;
 
 public class Server {
 
@@ -30,6 +32,7 @@ public class Server {
         server.delete("session", this::logout);
         server.get("game", this::listGames);
         server.post("game", this::createGame);
+        server.put("game", this::joinGame);
 
     }
 
@@ -77,7 +80,9 @@ public class Server {
         try {
             var authToken = ctx.header("authorization");
             var res = userService.listGames(authToken);
-            ctx.status(200).result(serializer.toJson(res));
+            record ListGamesResponse(Collection<GameData> games) {
+            }
+            ctx.status(200).result(serializer.toJson(new ListGamesResponse(res)));
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
         } catch (Exception e) {
@@ -94,6 +99,20 @@ public class Server {
             record GameResponse(int gameID) {
             }
             ctx.status(200).result(serializer.toJson(new GameResponse(res)));
+        } catch (ServiceException e) {
+            ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        } catch (Exception e) {
+            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+        }
+    }
+
+    public void joinGame(Context ctx) {
+        var serializer = new Gson();
+        try {
+            var authToken = ctx.header("authorization");
+            var req = serializer.fromJson(ctx.body(), JoinGameRequest.class);
+            userService.joinGame(authToken, req.playerColor(), req.gameID());
+            ctx.status(200).result("{}");
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
         } catch (Exception e) {
