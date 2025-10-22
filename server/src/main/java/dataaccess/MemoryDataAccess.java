@@ -4,7 +4,6 @@ import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import service.ServiceException;
 
 import java.util.Collection;
 import java.util.HashMap;

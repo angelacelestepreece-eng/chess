@@ -1,20 +1,18 @@
 package service;
 
-import chess.ChessGame;
 import dataAccess.DataAccess;
-import dataAccess.MemoryDataAccess;
-import dataAccess.DataAccessException;
+import datamodel.LoginResult;
 import datamodel.RegistrationResult;
 import model.AuthData;
-import model.GameData;
 import model.UserData;
-
-import java.util.Collection;
-import java.util.UUID;
 
 
 public class UserService {
-    private final DataAccess dataAccess = new MemoryDataAccess();
+    private final DataAccess dataAccess;
+
+    public UserService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
 
     public RegistrationResult register(UserData user) throws ServiceException {
         if (user.username() == null || user.password() == null || user.email() == null ||
@@ -31,7 +29,7 @@ public class UserService {
         return new RegistrationResult(auth.username(), auth.authToken());
     }
 
-    public AuthData login(UserData user) throws ServiceException {
+    public LoginResult login(UserData user) throws ServiceException {
         if (user.username() == null || user.password() == null ||
                 user.username().isBlank() || user.password().isBlank()) {
             throw new ServiceException(400, "Error: bad request");
@@ -46,7 +44,8 @@ public class UserService {
         if (!user.password().equals(registeredUser.password())) {
             throw new ServiceException(401, "Error: unauthorized");
         }
-        return dataAccess.createAuth(user);
+        AuthData auth = dataAccess.createAuth(user);
+        return new LoginResult(auth.username(), auth.authToken());
     }
 
     public void logout(String authToken) throws ServiceException {
@@ -58,67 +57,6 @@ public class UserService {
 
         dataAccess.deleteAuth(authToken);
 
-    }
-
-    public Collection<GameData> listGames(String authToken) throws ServiceException {
-        if (authToken == null || authToken.isBlank()) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
-        AuthData authData = dataAccess.getAuth(authToken);
-        if (authData == null) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
-        return dataAccess.getGames();
-    }
-
-    public int createGame(String gameName, String authToken) throws ServiceException {
-        if (gameName == null || gameName.isBlank()) {
-            throw new ServiceException(400, "Error: bad request");
-        }
-        if (authToken == null || authToken.isBlank()) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
-        AuthData authData = dataAccess.getAuth(authToken);
-        if (authData == null) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
-        GameData gameData = dataAccess.createGame(gameName);
-        return gameData.gameID();
-    }
-
-    public void joinGame(String authToken, String playerColor, int gameID) throws ServiceException {
-        if (authToken == null || authToken.isBlank() || playerColor == null || playerColor.isBlank()) {
-            throw new ServiceException(400, "Error: bad request");
-        }
-        AuthData authData = dataAccess.getAuth(authToken);
-        if (authData == null) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
-        GameData game = dataAccess.getGame(gameID);
-        if (game == null) {
-            throw new ServiceException(400, "Error: bad request");
-        }
-
-        String username = authData.username();
-        GameData updatedGame;
-
-        switch (playerColor.toLowerCase()) {
-            case "white" -> {
-                if (game.whiteUsername() != null) {
-                    throw new ServiceException(403, "Error: already taken");
-                }
-                updatedGame = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
-            }
-            case "black" -> {
-                if (game.blackUsername() != null) {
-                    throw new ServiceException(403, "Error: already taken");
-                }
-                updatedGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
-            }
-            default -> throw new ServiceException(400, "Error: bad request");
-        }
-
-        dataAccess.saveGame(updatedGame);
     }
 
     public void clear() {

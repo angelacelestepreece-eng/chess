@@ -1,30 +1,29 @@
 package server;
 
 import com.google.gson.Gson;
-import datamodel.CreateGameRequest;
-import datamodel.ErrorMessage;
-import datamodel.JoinGameRequest;
+import dataAccess.DataAccess;
+import dataAccess.MemoryDataAccess;
+import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.AuthData;
-import model.GameData;
 import model.UserData;
+import service.GameService;
 import service.ServiceException;
 import service.UserService;
-
-import java.security.Provider;
-import java.util.Collection;
 
 public class Server {
 
     private final Javalin server;
-    private UserService userService = new UserService();
+    private final DataAccess dataAccess = new MemoryDataAccess();
+    private final UserService userService = new UserService(dataAccess);
+    private final GameService gameService = new GameService(dataAccess);
 
     public Server() {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         server.delete("db", ctx -> {
             userService.clear();
+            gameService.clear();
             ctx.status(200).result("{}");
         });
         server.post("user", this::register);
@@ -53,7 +52,7 @@ public class Server {
         var serializer = new Gson();
         try {
             var req = serializer.fromJson(ctx.body(), UserData.class);
-            var res = userService.login(req);
+            LoginResult res = userService.login(req);
             ctx.status(200).result(serializer.toJson(res));
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
@@ -79,10 +78,8 @@ public class Server {
         var serializer = new Gson();
         try {
             var authToken = ctx.header("authorization");
-            var res = userService.listGames(authToken);
-            record ListGamesResponse(Collection<GameData> games) {
-            }
-            ctx.status(200).result(serializer.toJson(new ListGamesResponse(res)));
+            ListGamesResult res = gameService.listGames(authToken);
+            ctx.status(200).result(serializer.toJson(res));
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
         } catch (Exception e) {
@@ -95,10 +92,8 @@ public class Server {
         try {
             var authToken = ctx.header("authorization");
             var req = serializer.fromJson(ctx.body(), CreateGameRequest.class);
-            var res = userService.createGame(req.gameName(), authToken);
-            record GameResponse(int gameID) {
-            }
-            ctx.status(200).result(serializer.toJson(new GameResponse(res)));
+            CreateGameResult res = gameService.createGame(req.gameName(), authToken);
+            ctx.status(200).result(serializer.toJson((res)));
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
         } catch (Exception e) {
@@ -111,7 +106,7 @@ public class Server {
         try {
             var authToken = ctx.header("authorization");
             var req = serializer.fromJson(ctx.body(), JoinGameRequest.class);
-            userService.joinGame(authToken, req.playerColor(), req.gameID());
+            gameService.joinGame(authToken, req.playerColor(), req.gameID());
             ctx.status(200).result("{}");
         } catch (ServiceException e) {
             ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
