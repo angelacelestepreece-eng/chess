@@ -9,8 +9,9 @@ package chess;
 public class ChessBoard {
 
     private ChessPiece[][] board = new ChessPiece[8][8];
+
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -19,8 +20,8 @@ public class ChessBoard {
      * @param position where to add the piece to
      * @param piece    the piece to add
      */
-    public void addPiece(ChessPosition pos, ChessPiece piece) {
-        board[pos.getRow()-1][pos.getColumn()-1] = piece;
+    public void addPiece(ChessPosition position, ChessPiece piece) {
+        board[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -35,8 +36,8 @@ public class ChessBoard {
     }
 
     //removes piece from position passed in off of the board
-    public void removePiece(ChessPosition position){
-        board[position.getRow()-1][position.getColumn()-1] = null;
+    public void removePiece(ChessPosition position) {
+        board[position.getRow() - 1][position.getColumn() - 1] = null;
     }
 
     /**
@@ -44,15 +45,15 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        for (int row = 0; row<8; row++){
-            for(int col = 0; col<8; col++){
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
                 board[row][col] = null;
             }
         }
 
-        for (int col=1; col <=8; col++){
-            addPiece(new ChessPosition(2,col), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
-            addPiece(new ChessPosition(7,col), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        for (int col = 1; col <= 8; col++) {
+            addPiece(new ChessPosition(2, col), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, col), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
 
         ChessPiece.PieceType[] order = {
@@ -67,24 +68,15 @@ public class ChessBoard {
         }
     }
 
-    public ChessBoard copy() {
-        ChessBoard copy = new ChessBoard();
-        copy.board = new ChessPiece[8][8];
-
-        for(int row = 0; row < 8; row++){
-            for(int col = 0; col<8; col++){
-                ChessPiece orig = this.board[row][col];
-                copy.board[row][col] = (orig != null) ? orig.copy() : null;
-            }
-        }
-        return copy;
-    }
-
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessBoard that = (ChessBoard) o;
 
         for (int row = 0; row < 8; row++) {

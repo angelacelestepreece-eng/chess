@@ -12,24 +12,39 @@ import java.util.HashSet;
  */
 public class ChessPiece {
 
-    private PieceType type;
-    private ChessGame.TeamColor pieceColor;
+    private final PieceType type;
+    private final ChessGame.TeamColor pieceColor;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.type = type;
         this.pieceColor = pieceColor;
     }
 
-    /**
-     * The various different chess piece options
-     */
-    public enum PieceType {
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
+    public static ArrayList<ChessPosition> findTeamPositions(ChessBoard board, ChessGame.TeamColor color) {
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece currPiece = board.getPiece(pos);
+
+                if (currPiece != null && currPiece.getTeamColor() == color) {
+                    positions.add(pos);
+                }
+            }
+        }
+        return positions;
+    }
+
+    public static ArrayList<ChessPosition> findPiecePositionsForTeam(ChessPiece.PieceType pieceType, ChessBoard board, ChessGame.TeamColor color) {
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+        ArrayList<ChessPosition> allPositions = findTeamPositions(board, color);
+        for (ChessPosition pos : allPositions) {
+            if (board.getPiece(pos).getPieceType() == pieceType) {
+                positions.add(pos);
+            }
+        }
+        return positions;
     }
 
     /**
@@ -51,50 +66,25 @@ public class ChessPiece {
      * Does not take into account moves that are illegal due to leaving the king in
      * danger
      *
-     *
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 
         Rule rule = switch (getPieceType()) {
             case BISHOP -> new Rules(true, new int[][]{{1, 1}, {-1, 1}, {-1, -1}, {1, -1}});
-            case ROOK   -> new Rules(true, new int[][]{{1, 0}, {0, -1}, {-1, 0}, {0, 1}});
-            case KNIGHT -> new Rules(false, new int[][]{{1, 2}, {-1, 2}, {1, -2}, {-1, -2}, {2, 1}, {-2, 1}, {2, -1}, {-2, -1}});
-            case QUEEN  -> new Rules(true, new int[][]{{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {0, -1}, {-1, 0}, {0, 1}});
-            case KING   -> new Rules(false, new int[][]{{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {0, -1}, {-1, 0}, {0, 1}});
-            case PAWN   -> new PawnRule();
+            case ROOK -> new Rules(true, new int[][]{{1, 0}, {0, -1}, {-1, 0}, {0, 1}});
+            case KNIGHT ->
+                    new Rules(false, new int[][]{{1, 2}, {-1, 2}, {1, -2}, {-1, -2}, {2, 1}, {-2, 1}, {2, -1}, {-2, -1}});
+            case QUEEN ->
+                    new Rules(true, new int[][]{{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {0, -1}, {-1, 0}, {0, 1}});
+            case KING ->
+                    new Rules(false, new int[][]{{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {0, -1}, {-1, 0}, {0, 1}});
+            case PAWN -> new PawnRule();
             default -> null;
         };
 
         return rule != null ? rule.getMoves(board, myPosition) : new HashSet<>();
 
-    }
-
-    public static ArrayList<ChessPosition> findTeamPositions(ChessBoard board, ChessGame.TeamColor color){
-        ArrayList<ChessPosition> positions = new ArrayList<>();
-
-        for(int row = 1; row <= 8; row ++){
-            for(int col = 1; col <= 8; col++){
-                ChessPosition pos = new ChessPosition(row,col);
-                ChessPiece currPiece = board.getPiece(pos);
-
-                if(currPiece != null && currPiece.getTeamColor() == color){
-                    positions.add(pos);
-                }
-            }
-        }
-        return positions;
-    }
-
-    public static ArrayList<ChessPosition> findPiecePositionsForTeam(ChessPiece.PieceType pieceType, ChessBoard board, ChessGame.TeamColor color){
-        ArrayList<ChessPosition> positions = new ArrayList<>();
-        ArrayList<ChessPosition> allPositions = findTeamPositions(board, color);
-        for (ChessPosition pos : allPositions){
-            if (board.getPiece(pos).getPieceType() == pieceType){
-                positions.add(pos);
-            }
-        }
-        return positions;
     }
 
     public ChessPiece copy() {
@@ -103,8 +93,12 @@ public class ChessPiece {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessPiece that = (ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
@@ -117,5 +111,12 @@ public class ChessPiece {
     @Override
     public String toString() {
         return String.format("%s %s", pieceColor, type);
+    }
+
+    /**
+     * The various different chess piece options
+     */
+    public enum PieceType {
+        KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN
     }
 }

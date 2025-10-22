@@ -19,27 +19,27 @@ public class Rules implements Rule {
         ChessPiece piece = board.getPiece(myPosition);
 
         for (int[] move : directions) {
-                int row = myPosition.getRow();
-                int col = myPosition.getColumn();
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
 
-                do {
-                    row += move[0];
-                    col += move[1];
+            do {
+                row += move[0];
+                col += move[1];
 
-                    if (ChessPosition.invalidPosition(row, col)) {
-                        break;
+                if (ChessPosition.invalidPosition(row, col)) {
+                    break;
+                }
+                ChessPosition newPosition = new ChessPosition(row, col);
+                ChessPiece otherPiece = board.getPiece(newPosition);
+
+                if (otherPiece != null) {
+                    if (otherPiece.getTeamColor() != piece.getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, newPosition, null));
                     }
-                    ChessPosition newPosition = new ChessPosition(row, col);
-                    ChessPiece otherPiece = board.getPiece(newPosition);
-
-                    if (otherPiece != null) {
-                        if (otherPiece.getTeamColor() != piece.getTeamColor()){
-                            moves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                        break;
-                    }
-                    moves.add(new ChessMove(myPosition, newPosition, null));
-                } while (toEdge);
+                    break;
+                }
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            } while (toEdge);
         }
 
 

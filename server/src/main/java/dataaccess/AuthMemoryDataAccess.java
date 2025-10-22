@@ -7,7 +7,11 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class AuthMemoryDataAccess implements AuthDAO {
-    private HashMap<String, AuthData> auths = new HashMap<>();
+    private final HashMap<String, AuthData> auths = new HashMap<>();
+
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
+    }
 
     public AuthData createAuth(UserData user) {
         String authToken = generateToken();
@@ -26,9 +30,5 @@ public class AuthMemoryDataAccess implements AuthDAO {
 
     public void clear() {
         auths.clear();
-    }
-
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
     }
 }

@@ -7,12 +7,11 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessMove {
-    private ChessPosition startPosition;
-    private ChessPosition endPosition;
-    private ChessPiece.PieceType promotionPiece;
+    private final ChessPosition startPosition;
+    private final ChessPosition endPosition;
+    private final ChessPiece.PieceType promotionPiece;
 
-    public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
-                     ChessPiece.PieceType promotionPiece) {
+    public ChessMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
@@ -45,17 +44,19 @@ public class ChessMove {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessMove move = (ChessMove) o;
-        return (startPosition.equals(move.startPosition) && endPosition.equals(move.endPosition)
-                && promotionPiece == move.promotionPiece);
+        return (startPosition.equals(move.startPosition) && endPosition.equals(move.endPosition) && promotionPiece == move.promotionPiece);
     }
 
     @Override
     public int hashCode() {
-        var promotionCode = (promotionPiece == null ?
-                9 : promotionPiece.ordinal());
+        var promotionCode = (promotionPiece == null ? 9 : promotionPiece.ordinal());
         return (71 * startPosition.hashCode()) + endPosition.hashCode() + promotionCode;
     }
 

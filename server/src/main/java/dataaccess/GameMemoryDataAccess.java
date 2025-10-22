@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameMemoryDataAccess implements GameDAO {
-    private HashMap<Integer, GameData> games = new HashMap<>();
+    private final AtomicInteger gameCounter = new AtomicInteger(1);
+    private final HashMap<Integer, GameData> games = new HashMap<>();
 
     public Collection<GameData> getGames() {
         return games.values();
@@ -32,7 +33,5 @@ public class GameMemoryDataAccess implements GameDAO {
     public void clear() {
         games.clear();
     }
-
-    private final AtomicInteger gameCounter = new AtomicInteger(1);
 
 }
