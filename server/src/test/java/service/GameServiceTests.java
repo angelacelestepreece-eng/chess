@@ -31,37 +31,37 @@ public class GameServiceTests {
     }
 
     @Test
-    void listGames_validToken_returnsGames() throws ServiceException {
+    void listGamesValidToken() throws ServiceException {
         var result = service.listGames(validToken);
         assertNotNull(result.games());
         assertFalse(result.games().isEmpty());
     }
 
     @Test
-    void listGames_invalidToken_throwsUnauthorized() {
+    void listGamesInvalidToken() {
         assertThrows(ServiceException.class, () -> service.listGames("invalid-token"));
     }
 
     @Test
-    void createGame_validInput_returnsGameID() throws ServiceException {
+    void createGameValidInput() throws ServiceException {
         var result = service.createGame("New Game", validToken);
         assertTrue(result.gameID() > 0);
     }
 
     @Test
-    void createGame_blankName_throwsBadRequest() {
+    void createGameBlankName() {
         assertThrows(ServiceException.class, () -> service.createGame(" ", validToken));
     }
 
     @Test
-    void joinGame_validWhiteJoin_success() throws ServiceException {
+    void joinGameValidWhiteJoin() throws ServiceException {
         service.joinGame(validToken, "WHITE", gameID);
         var updated = dao.getGame(gameID);
         assertEquals("john", updated.whiteUsername());
     }
 
     @Test
-    void joinGame_alreadyTakenColor_throwsAlreadyTaken() throws ServiceException {
+    void joinGameAlreadyTakenColor() throws ServiceException {
         service.joinGame(validToken, "white", gameID);
         UserData otherUser = new UserData("will", "pass", "email");
         dao.createUser(otherUser);
@@ -73,7 +73,7 @@ public class GameServiceTests {
     }
 
     @Test
-    void clear_allData() {
+    void clearAllData() {
         service.clear();
         assertTrue(dao.getGames().isEmpty());
         assertNull(dao.getAuth(validToken));

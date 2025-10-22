@@ -18,7 +18,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void register_validUser_returnsAuthData() throws ServiceException {
+    void registerValidUser() throws ServiceException {
         UserData user = new UserData("kiley", "password", "email");
         var result = service.register(user);
 
@@ -27,7 +27,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void register_duplicateUsername_throwsAlreadyTaken() throws ServiceException {
+    void registerDuplicateUsername() throws ServiceException {
         UserData user = new UserData("natalie", "password", "email");
         service.register(user);
 
@@ -36,7 +36,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void login_valid_returnsAuthData() throws ServiceException {
+    void loginValid() throws ServiceException {
         UserData user = new UserData("sarah", "password", "email");
         service.register(user);
 
@@ -46,7 +46,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void login_withWrongPassword_throwsUnauthorized() throws ServiceException {
+    void loginWithWrongPassword() throws ServiceException {
         UserData user = new UserData("molly", "password", "email");
         service.register(user);
 
@@ -56,7 +56,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void logout_valid_deletesAuth() throws ServiceException {
+    void logoutValid() throws ServiceException {
         UserData user = new UserData("jayson", "password", "email");
         var result = service.register(user);
         service.logout(result.authToken());
@@ -64,13 +64,13 @@ public class UserServiceTests {
     }
 
     @Test
-    void logout_invalidToken_throwsUnauthorized() {
+    void logoutInvalidToken() {
         ServiceException ex = assertThrows(ServiceException.class, () -> service.logout("invalid-token"));
         assertEquals("Error: unauthorized", ex.getMessage());
     }
 
     @Test
-    void clear_allData() throws ServiceException {
+    void clearAllData() throws ServiceException {
         UserData user = new UserData("jennifer", "password", "email");
         var result = service.register(user);
         service.clear();
