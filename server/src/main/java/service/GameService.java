@@ -1,7 +1,6 @@
 package service;
 
-import dataAccess.DataAccess;
-import dataAccess.MemoryDataAccess;
+import dataaccess.DataAccess;
 import datamodel.CreateGameResult;
 import datamodel.ListGamesResult;
 import model.AuthData;

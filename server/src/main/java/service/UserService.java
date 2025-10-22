@@ -1,6 +1,6 @@
 package service;
 
-import dataAccess.DataAccess;
+import dataaccess.DataAccess;
 import datamodel.LoginResult;
 import datamodel.RegistrationResult;
 import model.AuthData;
