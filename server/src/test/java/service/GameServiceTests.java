@@ -1,0 +1,81 @@
+package service;
+
+import dataaccess.MemoryDataAccess;
+import model.AuthData;
+import model.GameData;
+import model.UserData;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class GameServiceTests {
+    private GameService service;
+    private MemoryDataAccess dao;
+    private String validToken;
+    private int gameID;
+
+    @BeforeEach
+    void setup() {
+        dao = new MemoryDataAccess();
+        service = new GameService(dao);
+
+        UserData user = new UserData("john", "password", "email");
+        dao.createUser(user);
+        AuthData auth = dao.createAuth(user);
+
+        validToken = auth.authToken();
+
+        GameData game = dao.createGame("TestGame");
+        gameID = game.gameID();
+    }
+
+    @Test
+    void listGames_validToken_returnsGames() throws ServiceException {
+        var result = service.listGames(validToken);
+        assertNotNull(result.games());
+        assertFalse(result.games().isEmpty());
+    }
+
+    @Test
+    void listGames_invalidToken_throwsUnauthorized() {
+        assertThrows(ServiceException.class, () -> service.listGames("invalid-token"));
+    }
+
+    @Test
+    void createGame_validInput_returnsGameID() throws ServiceException {
+        var result = service.createGame("New Game", validToken);
+        assertTrue(result.gameID() > 0);
+    }
+
+    @Test
+    void createGame_blankName_throwsBadRequest() {
+        assertThrows(ServiceException.class, () -> service.createGame(" ", validToken));
+    }
+
+    @Test
+    void joinGame_validWhiteJoin_success() throws ServiceException {
+        service.joinGame(validToken, "WHITE", gameID);
+        var updated = dao.getGame(gameID);
+        assertEquals("john", updated.whiteUsername());
+    }
+
+    @Test
+    void joinGame_alreadyTakenColor_throwsAlreadyTaken() throws ServiceException {
+        service.joinGame(validToken, "white", gameID);
+        UserData otherUser = new UserData("will", "pass", "email");
+        dao.createUser(otherUser);
+        AuthData otherAuth = dao.createAuth(otherUser);
+
+        ServiceException ex = assertThrows(ServiceException.class, () ->
+                service.joinGame(otherAuth.authToken(), "WHITE", gameID));
+        assertEquals("Error: already taken", ex.getMessage());
+    }
+
+    @Test
+    void clear_allData() {
+        service.clear();
+        assertTrue(dao.getGames().isEmpty());
+        assertNull(dao.getAuth(validToken));
+    }
+}
