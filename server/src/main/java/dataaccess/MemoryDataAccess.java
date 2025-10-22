@@ -1,91 +1,55 @@
 package dataAccess;
 
-import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MemoryDataAccess implements DataAccess {
-    private HashMap<String, UserData> users = new HashMap<>();
-    private HashMap<String, AuthData> auths = new HashMap<>();
-    private HashMap<Integer, GameData> games = new HashMap<>();
+    private final UserDAO users = new UserMemoryDataAccess();
+    private final AuthDAO auths = new AuthMemoryDataAccess();
+    private final GameDAO games = new GameMemoryDataAccess();
 
-
-    public void saveUser(UserData user) {
-        users.put(user.username(), user);
-    }
-
-    @Override
     public void clear() {
         users.clear();
         auths.clear();
         games.clear();
     }
 
-    @Override
     public void createUser(UserData user) {
-        users.put(user.username(), user);
+        users.createUser(user);
     }
 
-    @Override
     public UserData getUser(String username) {
-        return users.get(username);
+        return users.getUser(username);
     }
 
-    @Override
     public AuthData createAuth(UserData user) {
-        String authToken = generateToken();
-        AuthData auth = new AuthData(user.username(), authToken);
-        auths.put(authToken, auth);
-        return auth;
+        return auths.createAuth(user);
     }
 
-    @Override
     public AuthData getAuth(String authToken) {
-        return auths.get(authToken);
+        return auths.getAuth(authToken);
     }
 
-    @Override
     public void deleteAuth(String authToken) {
-        auths.remove(authToken);
+        auths.deleteAuth(authToken);
     }
 
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
-    }
-
-    @Override
     public Collection<GameData> getGames() {
-        return games.values();
+        return games.getGames();
     }
 
-    @Override
     public GameData createGame(String gameName) {
-        int newGameID = gameCounter.getAndIncrement();
-        GameData gameData = new GameData(newGameID, null, null, gameName, new ChessGame());
-        saveGame(gameData);
-        return gameData;
+        return games.createGame(gameName);
     }
 
-    @Override
     public void saveGame(GameData game) {
-        games.put(game.gameID(), game);
+        games.saveGame(game);
     }
 
-    @Override
     public GameData getGame(int gameID) {
-        return games.get(gameID);
+        return games.getGame(gameID);
     }
-
-    private final AtomicInteger gameCounter = new AtomicInteger(1);
-
-    public static String generateUniqueGameID() {
-        return UUID.randomUUID().toString();
-    }
-
 }
