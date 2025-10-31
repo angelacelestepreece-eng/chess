@@ -2,7 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.ResponseException;
 import datamodel.*;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -10,22 +10,42 @@ import model.UserData;
 import service.GameService;
 import service.ServiceException;
 import service.UserService;
+import dataaccess.MySQLDataAccess;
 
 public class Server {
 
     private final Javalin server;
-    private final DataAccess dataAccess = new MemoryDataAccess();
-    private final UserService userService = new UserService(dataAccess);
-    private final GameService gameService = new GameService(dataAccess);
+    private final DataAccess dataAccess;
+    private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
+        DataAccess dao;
+        try {
+            dao = new MySQLDataAccess();
+        } catch (ResponseException e) {
+            throw new RuntimeException("Failed to initialize database access", e);
+        }
+
+        this.dataAccess = dao;
+        this.userService = new UserService(dataAccess);
+        this.gameService = new GameService(dataAccess);
+
         server.delete("db", ctx -> {
-            userService.clear();
-            gameService.clear();
-            ctx.status(200).result("{}");
+            var serializer = new Gson();
+            try {
+                userService.clear();
+                gameService.clear();
+                ctx.status(200).result("{}");
+            } catch (ServiceException e) {
+                ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            } catch (Exception e) {
+                ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            }
         });
+
         server.post("user", this::register);
         server.post("session", this::login);
         server.delete("session", this::logout);

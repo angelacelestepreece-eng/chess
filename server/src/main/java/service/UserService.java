@@ -6,7 +6,9 @@ import datamodel.LoginResult;
 import datamodel.RegistrationResult;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
+import java.awt.image.BandCombineOp;
 import java.security.Provider;
 
 
@@ -32,7 +34,8 @@ public class UserService {
             AuthData auth = dataAccess.createAuth(user);
             return new RegistrationResult(auth.username(), auth.authToken());
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
     }
 
@@ -45,17 +48,16 @@ public class UserService {
         try {
             UserData registeredUser = dataAccess.getUser(user.username());
 
-            if (registeredUser == null) {
+            if (registeredUser == null ||
+                    !BCrypt.checkpw(user.password(), registeredUser.password())) {
                 throw new ServiceException(401, "Error: unauthorized");
             }
 
-            if (!user.password().equals(registeredUser.password())) {
-                throw new ServiceException(401, "Error: unauthorized");
-            }
-            AuthData auth = dataAccess.createAuth(user);
+            AuthData auth = dataAccess.createAuth(registeredUser);
             return new LoginResult(auth.username(), auth.authToken());
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
     }
 
@@ -69,16 +71,17 @@ public class UserService {
 
             dataAccess.deleteAuth(authToken);
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
-
     }
 
     public void clear() throws ServiceException {
         try {
             dataAccess.clear();
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
     }
 }

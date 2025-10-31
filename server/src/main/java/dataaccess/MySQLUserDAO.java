@@ -3,6 +3,7 @@ package dataaccess;
 import model.UserData;
 import dataaccess.ResponseException;
 import com.google.gson.Gson;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
@@ -16,8 +17,9 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void createUser(UserData user) throws ResponseException {
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        executeUpdate(statement, user.username(), user.password(), user.email());
+        executeUpdate(statement, user.username(), hashedPassword, user.email());
     }
 
     @Override
@@ -40,9 +42,10 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void clear() throws ResponseException {
-        var statement = "TRUNCATE user";
+        var statement = "DELETE FROM user";
         executeUpdate(statement);
     }
+
 
     private UserData readUser(ResultSet rs) throws SQLException {
         var username = rs.getString("username");
@@ -52,22 +55,28 @@ public class MySQLUserDAO implements UserDAO {
     }
 
     private int executeUpdate(String statement, Object... params) throws ResponseException {
-        try (Connection conn = DatabaseManager.getConnection();
-             var preparedStatement = conn.prepareStatement(statement)) {
-            for (int i = 0; i < params.length; i++) {
-                Object param = params[i];
-                if (param instanceof String p) {
-                    preparedStatement.setString(i + 1, p);
-                } else if (param instanceof Integer p) {
-                    preparedStatement.setInt(i + 1, p);
-                } else if (param == null) {
-                    preparedStatement.setNull(i + 1, NULL);
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                for (int i = 0; i < params.length; i++) {
+                    Object param = params[i];
+                    if (param instanceof String p) {
+                        preparedStatement.setString(i + 1, p);
+                    } else if (param instanceof Integer p) {
+                        preparedStatement.setInt(i + 1, p);
+                    } else if (param == null) {
+                        preparedStatement.setNull(i + 1, NULL);
+                    }
                 }
+                return preparedStatement.executeUpdate();
             }
-            return preparedStatement.executeUpdate();
-        } catch (SQLException | DataAccessException e) {
+        } catch (SQLException e) {
             throw new ResponseException(ResponseException.Code.ServerError,
-                    String.format("Unable to update database: %s, %s", statement, e.getMessage()));
+                    String.format("SQL error during update: %s, %s", statement, e.getMessage()));
+        } catch (DataAccessException e) {
+            throw new ResponseException(ResponseException.Code.ServerError,
+                    String.format("Connection error during update: %s, %s", statement, e.getMessage()));
         }
     }
 

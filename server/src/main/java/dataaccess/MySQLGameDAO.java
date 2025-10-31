@@ -18,24 +18,28 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public GameData createGame(String gameName) throws ResponseException {
-        GameData game = new GameData(0, null, null, gameName, null);
-        String json = new Gson().toJson(game);
-        var statement = "INSERT INTO game (gameName, json) VALUES (?, ?)";
-        int id = executeUpdate(statement, gameName, json);
-        return new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+        var insertStatement = "INSERT INTO game (gameName, json) VALUES (?, ?)";
+        int gameID = executeInsert(insertStatement, gameName, "{}");
+        GameData finalGame = new GameData(gameID, null, null, gameName, null);
+        String updatedJson = new Gson().toJson(finalGame);
+        var updateStatement = "UPDATE game SET json=? WHERE gameID=?";
+        int rows = executeUpdate(updateStatement, updatedJson, gameID);
+        if (rows == 0) {
+            throw new ResponseException(ResponseException.Code.ServerError, "Failed to update game JSON");
+        }
+        return finalGame;
     }
+
 
     @Override
     public GameData getGame(int gameID) throws ResponseException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT json FROM game WHERE gameID=?";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setInt(1, gameID);
-                try (ResultSet rs = preparedStatement.executeQuery()) {
-                    if (rs.next()) {
-                        GameData game = new Gson().fromJson(rs.getString("json"), GameData.class);
-                        return new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
-                    }
+        String statement = "SELECT json FROM game WHERE gameID=?";
+        try (Connection conn = DatabaseManager.getConnection();
+             var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.setInt(1, gameID);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    return new Gson().fromJson(rs.getString("json"), GameData.class);
                 }
             }
         } catch (SQLException | DataAccessException e) {
@@ -48,23 +52,20 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public Collection<GameData> getGames() throws ResponseException {
+        var statement = "SELECT json FROM game";
         var result = new ArrayList<GameData>();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, json FROM game";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                try (ResultSet rs = preparedStatement.executeQuery()) {
-                    while (rs.next()) {
-                        int id = rs.getInt("gameID");
-                        GameData game = new Gson().fromJson(rs.getString("json"), GameData.class);
-                        result.add(new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game()));
-                    }
-                    return result;
-                }
+        try (Connection conn = DatabaseManager.getConnection();
+             var preparedStatement = conn.prepareStatement(statement);
+             ResultSet rs = preparedStatement.executeQuery()) {
+            while (rs.next()) {
+                GameData game = new Gson().fromJson(rs.getString("json"), GameData.class);
+                result.add(game);
             }
         } catch (SQLException | DataAccessException e) {
             throw new ResponseException(ResponseException.Code.ServerError,
                     String.format("Unable to list games: %s", e.getMessage()));
         }
+        return result;
     }
 
     @Override
@@ -80,7 +81,8 @@ public class MySQLGameDAO implements GameDAO {
         executeUpdate(statement);
     }
 
-    private int executeUpdate(String statement, Object... params) throws ResponseException {
+
+    private int executeInsert(String statement, Object... params) throws ResponseException {
         try (Connection conn = DatabaseManager.getConnection();
              var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < params.length; i++) {
@@ -94,27 +96,46 @@ public class MySQLGameDAO implements GameDAO {
                 }
             }
             preparedStatement.executeUpdate();
-            ResultSet rs = preparedStatement.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
+            try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
-            return 0;
+            throw new ResponseException(ResponseException.Code.ServerError, "No gameID returned from insert");
+        } catch (SQLException | DataAccessException e) {
+            throw new ResponseException(ResponseException.Code.ServerError,
+                    String.format("Unable to insert into game table: %s, %s", statement, e.getMessage()));
+        }
+    }
+
+
+    private int executeUpdate(String statement, Object... params) throws ResponseException {
+        try (Connection conn = DatabaseManager.getConnection();
+             var preparedStatement = conn.prepareStatement(statement)) {
+            for (int i = 0; i < params.length; i++) {
+                Object param = params[i];
+                if (param instanceof String p) {
+                    preparedStatement.setString(i + 1, p);
+                } else if (param instanceof Integer p) {
+                    preparedStatement.setInt(i + 1, p);
+                } else if (param == null) {
+                    preparedStatement.setNull(i + 1, NULL);
+                }
+            }
+            return preparedStatement.executeUpdate();
         } catch (SQLException | DataAccessException e) {
             throw new ResponseException(ResponseException.Code.ServerError,
                     String.format("Unable to update game table: %s, %s", statement, e.getMessage()));
         }
     }
 
+
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS game (
                 gameID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 gameName VARCHAR(45),
-                whitePlayerName VARCHAR(100),
-                blackPlayerName VARCHAR(100),
-                game longtext NOT NULL,
-                state VARCHAR(45),
-                description VARCHAR(256)
+                json LONGTEXT
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };

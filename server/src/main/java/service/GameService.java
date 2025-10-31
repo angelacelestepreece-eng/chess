@@ -29,7 +29,8 @@ public class GameService {
             Collection<GameData> games = dataAccess.getGames();
             return new ListGamesResult(games);
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
     }
 
@@ -50,7 +51,8 @@ public class GameService {
             int gameID = gameData.gameID();
             return new CreateGameResult(gameID);
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
     }
 
@@ -90,7 +92,8 @@ public class GameService {
 
             dataAccess.saveGame(updatedGame);
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
     }
 
@@ -98,7 +101,8 @@ public class GameService {
         try {
             dataAccess.clear();
         } catch (ResponseException e) {
-            throw new ServiceException(500, "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
+            throw new ServiceException(500, "Error: " + msg);
         }
     }
 }

@@ -23,21 +23,21 @@ public class MySQLAuthDAO implements AuthDAO {
     @Override
     public AuthData createAuth(UserData user) throws ResponseException {
         String authToken = generateToken();
-        var statement = "INSERT INTO auth (authToken, username, json) VALUES (?, ?, ?)";
-        String json = new Gson().toJson(new AuthData(user.username(), authToken));
-        executeUpdate(statement, authToken, user.username(), json);
+        var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
+        executeUpdate(statement, authToken, user.username());
         return new AuthData(user.username(), authToken);
     }
 
     @Override
     public AuthData getAuth(String authToken) throws ResponseException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT json FROM auth WHERE authToken=?";
+            var statement = "SELECT username FROM auth WHERE authToken=?";
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, authToken);
                 try (ResultSet rs = preparedStatement.executeQuery()) {
                     if (rs.next()) {
-                        return new Gson().fromJson(rs.getString("json"), AuthData.class);
+                        String username = rs.getString("username");
+                        return new AuthData(username, authToken);
                     }
                 }
             }
@@ -85,7 +85,6 @@ public class MySQLAuthDAO implements AuthDAO {
             CREATE TABLE IF NOT EXISTS auth (
                 authToken VARCHAR(100) NOT NULL PRIMARY KEY,
                 username VARCHAR(100) NOT NULL,
-                json TEXT DEFAULT NULL,
                 INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci    
             """
