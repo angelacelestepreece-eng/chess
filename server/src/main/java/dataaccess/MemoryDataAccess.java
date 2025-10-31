@@ -25,15 +25,15 @@ public class MemoryDataAccess implements DataAccess {
         return users.getUser(username);
     }
 
-    public AuthData createAuth(UserData user) {
+    public AuthData createAuth(UserData user) throws ResponseException {
         return auths.createAuth(user);
     }
 
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws ResponseException {
         return auths.getAuth(authToken);
     }
 
-    public void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) throws ResponseException {
         auths.deleteAuth(authToken);
     }
 

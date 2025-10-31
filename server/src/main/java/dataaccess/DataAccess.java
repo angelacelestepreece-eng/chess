@@ -13,11 +13,11 @@ public interface DataAccess {
 
     UserData getUser(String username) throws ResponseException;
 
-    AuthData createAuth(UserData user);
+    AuthData createAuth(UserData user) throws ResponseException;
 
-    AuthData getAuth(String auth);
+    AuthData getAuth(String auth) throws ResponseException;
 
-    void deleteAuth(String authToken);
+    void deleteAuth(String authToken) throws ResponseException;
 
     Collection<GameData> getGames();
 

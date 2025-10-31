@@ -60,13 +60,17 @@ public class UserService {
     }
 
     public void logout(String authToken) throws ServiceException {
-        AuthData authData = dataAccess.getAuth(authToken);
+        try {
+            AuthData authData = dataAccess.getAuth(authToken);
 
-        if (authData == null) {
-            throw new ServiceException(401, "Error: unauthorized");
+            if (authData == null) {
+                throw new ServiceException(401, "Error: unauthorized");
+            }
+
+            dataAccess.deleteAuth(authToken);
+        } catch (ResponseException e) {
+            throw new ServiceException(500, "Error: " + e.getMessage());
         }
-
-        dataAccess.deleteAuth(authToken);
 
     }
 

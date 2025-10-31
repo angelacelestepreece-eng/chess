@@ -56,7 +56,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void logoutValid() throws ServiceException {
+    void logoutValid() throws Exception {
         UserData user = new UserData("jayson", "password", "email");
         var result = service.register(user);
         service.logout(result.authToken());

@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.MemoryDataAccess;
+import dataaccess.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -73,7 +74,7 @@ public class GameServiceTests {
     }
 
     @Test
-    void clearAllData() throws ServiceException {
+    void clearAllData() throws Exception {
         service.clear();
         assertTrue(dao.getGames().isEmpty());
         assertNull(dao.getAuth(validToken));
