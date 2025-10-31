@@ -78,7 +78,11 @@ public class GameService {
         dataAccess.saveGame(updatedGame);
     }
 
-    public void clear() {
-        dataAccess.clear();
+    public void clear() throws ServiceException {
+        try {
+            dataAccess.clear();
+        } catch (Exception e) {
+            throw new ServiceException(500, "Error: " + e.getMessage());
+        }
     }
 }

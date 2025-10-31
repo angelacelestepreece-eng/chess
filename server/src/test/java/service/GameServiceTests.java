@@ -16,7 +16,7 @@ public class GameServiceTests {
     private int gameID;
 
     @BeforeEach
-    void setup() {
+    void setup() throws Exception {
         dao = new MemoryDataAccess();
         service = new GameService(dao);
 
@@ -61,7 +61,7 @@ public class GameServiceTests {
     }
 
     @Test
-    void joinGameAlreadyTakenColor() throws ServiceException {
+    void joinGameAlreadyTakenColor() throws Exception {
         service.joinGame(validToken, "white", gameID);
         UserData otherUser = new UserData("will", "pass", "email");
         dao.createUser(otherUser);
@@ -73,7 +73,7 @@ public class GameServiceTests {
     }
 
     @Test
-    void clearAllData() {
+    void clearAllData() throws ServiceException {
         service.clear();
         assertTrue(dao.getGames().isEmpty());
         assertNull(dao.getAuth(validToken));

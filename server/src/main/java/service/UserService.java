@@ -1,10 +1,13 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.ResponseException;
 import datamodel.LoginResult;
 import datamodel.RegistrationResult;
 import model.AuthData;
 import model.UserData;
+
+import java.security.Provider;
 
 
 public class UserService {
@@ -20,13 +23,17 @@ public class UserService {
             throw new ServiceException(400, "Error: bad request");
         }
 
-        if (dataAccess.getUser(user.username()) != null) {
-            throw new ServiceException(403, "Error: already taken");
-        }
+        try {
+            if (dataAccess.getUser(user.username()) != null) {
+                throw new ServiceException(403, "Error: already taken");
+            }
 
-        dataAccess.createUser(user);
-        AuthData auth = dataAccess.createAuth(user);
-        return new RegistrationResult(auth.username(), auth.authToken());
+            dataAccess.createUser(user);
+            AuthData auth = dataAccess.createAuth(user);
+            return new RegistrationResult(auth.username(), auth.authToken());
+        } catch (ResponseException e) {
+            throw new ServiceException(500, "Error: " + e.getMessage());
+        }
     }
 
     public LoginResult login(UserData user) throws ServiceException {
@@ -35,17 +42,21 @@ public class UserService {
             throw new ServiceException(400, "Error: bad request");
         }
 
-        UserData registeredUser = dataAccess.getUser(user.username());
+        try {
+            UserData registeredUser = dataAccess.getUser(user.username());
 
-        if (registeredUser == null) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
+            if (registeredUser == null) {
+                throw new ServiceException(401, "Error: unauthorized");
+            }
 
-        if (!user.password().equals(registeredUser.password())) {
-            throw new ServiceException(401, "Error: unauthorized");
+            if (!user.password().equals(registeredUser.password())) {
+                throw new ServiceException(401, "Error: unauthorized");
+            }
+            AuthData auth = dataAccess.createAuth(user);
+            return new LoginResult(auth.username(), auth.authToken());
+        } catch (ResponseException e) {
+            throw new ServiceException(500, "Error: " + e.getMessage());
         }
-        AuthData auth = dataAccess.createAuth(user);
-        return new LoginResult(auth.username(), auth.authToken());
     }
 
     public void logout(String authToken) throws ServiceException {
@@ -59,7 +70,11 @@ public class UserService {
 
     }
 
-    public void clear() {
-        dataAccess.clear();
+    public void clear() throws ServiceException {
+        try {
+            dataAccess.clear();
+        } catch (ResponseException e) {
+            throw new ServiceException(500, "Error: " + e.getMessage());
+        }
     }
 }

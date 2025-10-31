@@ -11,17 +11,17 @@ public class MemoryDataAccess implements DataAccess {
     private final AuthDAO auths = new AuthMemoryDataAccess();
     private final GameDAO games = new GameMemoryDataAccess();
 
-    public void clear() {
+    public void clear() throws ResponseException {
         users.clear();
         auths.clear();
         games.clear();
     }
 
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws ResponseException {
         users.createUser(user);
     }
 
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws ResponseException {
         return users.getUser(username);
     }
 

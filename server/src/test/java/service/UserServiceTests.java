@@ -70,7 +70,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void clearAllData() throws ServiceException {
+    void clearAllData() throws Exception {
         UserData user = new UserData("jennifer", "password", "email");
         var result = service.register(user);
         service.clear();
