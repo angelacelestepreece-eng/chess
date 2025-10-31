@@ -56,7 +56,7 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void clear() throws ResponseException {
-        var statement = "TRUNICATE auth";
+        var statement = "TRUNCATE auth";
         executeUpdate(statement);
     }
 

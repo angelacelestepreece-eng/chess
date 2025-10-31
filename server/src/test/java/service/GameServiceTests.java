@@ -32,7 +32,7 @@ public class GameServiceTests {
     }
 
     @Test
-    void listGamesValidToken() throws ServiceException {
+    void listGamesValidToken() throws Exception {
         var result = service.listGames(validToken);
         assertNotNull(result.games());
         assertFalse(result.games().isEmpty());
@@ -44,7 +44,7 @@ public class GameServiceTests {
     }
 
     @Test
-    void createGameValidInput() throws ServiceException {
+    void createGameValidInput() throws Exception {
         var result = service.createGame("New Game", validToken);
         assertTrue(result.gameID() > 0);
     }
@@ -55,7 +55,7 @@ public class GameServiceTests {
     }
 
     @Test
-    void joinGameValidWhiteJoin() throws ServiceException {
+    void joinGameValidWhiteJoin() throws Exception {
         service.joinGame(validToken, "WHITE", gameID);
         var updated = dao.getGame(gameID);
         assertEquals("john", updated.whiteUsername());

@@ -19,11 +19,11 @@ public interface DataAccess {
 
     void deleteAuth(String authToken) throws ResponseException;
 
-    Collection<GameData> getGames();
+    Collection<GameData> getGames() throws ResponseException;
 
-    GameData createGame(String gameName);
+    GameData createGame(String gameName) throws ResponseException;
 
-    void saveGame(GameData game);
+    void saveGame(GameData game) throws ResponseException;
 
-    GameData getGame(int gameID);
+    GameData getGame(int gameID) throws ResponseException;
 }

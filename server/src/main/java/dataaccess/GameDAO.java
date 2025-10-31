@@ -5,13 +5,13 @@ import model.GameData;
 import java.util.Collection;
 
 public interface GameDAO {
-    GameData createGame(String gameName);
+    GameData createGame(String gameName) throws ResponseException;
 
-    void saveGame(GameData game);
+    void saveGame(GameData game) throws ResponseException;
 
-    GameData getGame(int gameID);
+    GameData getGame(int gameID) throws ResponseException;
 
-    Collection<GameData> getGames();
+    Collection<GameData> getGames() throws ResponseException;
 
-    void clear();
+    void clear() throws ResponseException;
 }

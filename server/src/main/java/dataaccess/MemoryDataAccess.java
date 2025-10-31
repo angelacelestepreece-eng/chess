@@ -37,19 +37,19 @@ public class MemoryDataAccess implements DataAccess {
         auths.deleteAuth(authToken);
     }
 
-    public Collection<GameData> getGames() {
+    public Collection<GameData> getGames() throws ResponseException {
         return games.getGames();
     }
 
-    public GameData createGame(String gameName) {
+    public GameData createGame(String gameName) throws ResponseException {
         return games.createGame(gameName);
     }
 
-    public void saveGame(GameData game) {
+    public void saveGame(GameData game) throws ResponseException {
         games.saveGame(game);
     }
 
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws ResponseException {
         return games.getGame(gameID);
     }
 }
