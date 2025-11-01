@@ -76,6 +76,13 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     @Override
+    public void updateGame(GameData game) throws ResponseException {
+        String json = new Gson().toJson(game);
+        var statement = "UPDATE game SET json=? WHERE gameID=?";
+        executeUpdate(statement, json, game.gameID());
+    }
+
+    @Override
     public void clear() throws ResponseException {
         var statement = "TRUNCATE game";
         executeUpdate(statement);

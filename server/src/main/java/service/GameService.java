@@ -90,7 +90,7 @@ public class GameService {
                 default -> throw new ServiceException(400, "Error: bad request");
             }
 
-            dataAccess.saveGame(updatedGame);
+            dataAccess.updateGame(updatedGame);
         } catch (ResponseException e) {
             String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
             throw new ServiceException(500, "Error: " + msg);

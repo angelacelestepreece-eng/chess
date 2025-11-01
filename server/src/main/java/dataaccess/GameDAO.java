@@ -9,6 +9,8 @@ public interface GameDAO {
 
     void saveGame(GameData game) throws ResponseException;
 
+    void updateGame(GameData game) throws ResponseException;
+
     GameData getGame(int gameID) throws ResponseException;
 
     Collection<GameData> getGames() throws ResponseException;

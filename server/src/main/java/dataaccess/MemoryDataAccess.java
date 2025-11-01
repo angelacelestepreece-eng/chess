@@ -49,6 +49,10 @@ public class MemoryDataAccess implements DataAccess {
         games.saveGame(game);
     }
 
+    public void updateGame(GameData game) throws ResponseException {
+        games.updateGame(game);
+    }
+
     public GameData getGame(int gameID) throws ResponseException {
         return games.getGame(gameID);
     }

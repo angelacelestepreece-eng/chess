@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.MemoryDataAccess;
+import dataaccess.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void registerValidUser() throws ServiceException {
+    void registerValidUser() throws Exception {
         UserData user = new UserData("kiley", "password", "email");
         var result = service.register(user);
 
@@ -27,7 +28,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void registerDuplicateUsername() throws ServiceException {
+    void registerDuplicateUsername() throws Exception {
         UserData user = new UserData("natalie", "password", "email");
         service.register(user);
 
@@ -36,21 +37,21 @@ public class UserServiceTests {
     }
 
     @Test
-    void loginValid() throws ServiceException {
+    void loginValid() throws Exception {
         UserData user = new UserData("sarah", "password", "email");
         service.register(user);
 
-        var result = service.login(new UserData("sarah", "password", null));
+        var result = service.login(new UserData("sarah", "password", "email"));
         assertEquals("sarah", result.username());
         assertNotNull(result.authToken());
     }
 
     @Test
-    void loginWithWrongPassword() throws ServiceException {
+    void loginWithWrongPassword() throws Exception {
         UserData user = new UserData("molly", "password", "email");
         service.register(user);
 
-        UserData invalidLogin = new UserData("molly", "wrongpassword", null);
+        UserData invalidLogin = new UserData("molly", "wrongpassword", "email");
         ServiceException ex = assertThrows(ServiceException.class, () -> service.login(invalidLogin));
         assertEquals("Error: unauthorized", ex.getMessage());
     }
@@ -64,7 +65,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void logoutInvalidToken() {
+    void logoutInvalidToken() throws Exception {
         ServiceException ex = assertThrows(ServiceException.class, () -> service.logout("invalid-token"));
         assertEquals("Error: unauthorized", ex.getMessage());
     }

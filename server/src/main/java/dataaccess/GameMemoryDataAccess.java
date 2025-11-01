@@ -23,6 +23,16 @@ public class GameMemoryDataAccess implements GameDAO {
     }
 
     public void saveGame(GameData game) throws ResponseException {
+        if (games.containsKey(game.gameID())) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "Game ID already exists");
+        }
+        games.put(game.gameID(), game);
+    }
+
+    public void updateGame(GameData game) throws ResponseException {
+        if (!games.containsKey(game.gameID())) {
+            throw new ResponseException(ResponseException.Code.NotFound, "Game ID doesn't exist");
+        }
         games.put(game.gameID(), game);
     }
 

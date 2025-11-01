@@ -65,4 +65,9 @@ public class MySQLDataAccess implements DataAccess {
     public void saveGame(GameData game) throws ResponseException {
         gameDAO.saveGame(game);
     }
+
+    @Override
+    public void updateGame(GameData game) throws ResponseException {
+        gameDAO.updateGame(game);
+    }
 }
