@@ -62,18 +62,18 @@ public class MySQLAuthDAO implements AuthDAO {
 
     private int executeUpdate(String statement, Object... params) throws ResponseException {
         try (Connection conn = DatabaseManager.getConnection();
-             var prepparedStatement = conn.prepareStatement(statement)) {
+             var preparedStatement = conn.prepareStatement(statement)) {
             for (int i = 0; i < params.length; i++) {
                 Object param = params[i];
                 if (param instanceof String p) {
-                    prepparedStatement.setString(i + 1, p);
+                    preparedStatement.setString(i + 1, p);
                 } else if (param instanceof Integer p) {
-                    prepparedStatement.setInt(i + 1, p);
+                    preparedStatement.setInt(i + 1, p);
                 } else if (param == null) {
-                    prepparedStatement.setNull(i + 1, NULL);
+                    preparedStatement.setNull(i + 1, NULL);
                 }
             }
-            return prepparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate();
         } catch (SQLException | DataAccessException e) {
             throw new ResponseException(ResponseException.Code.ServerError,
                     String.format("Unable to Update auth table: %s, %s", statement, e.getMessage()));
