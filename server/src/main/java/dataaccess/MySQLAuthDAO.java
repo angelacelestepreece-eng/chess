@@ -50,7 +50,10 @@ public class MySQLAuthDAO implements AuthDAO {
     @Override
     public void deleteAuth(String authToken) throws ResponseException {
         var statement = "DELETE FROM auth WHERE authToken=?";
-        executeUpdate(statement, authToken);
+        int updated = executeUpdate(statement, authToken);
+        if (updated == 0) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "Auth token not found");
+        }
     }
 
     @Override

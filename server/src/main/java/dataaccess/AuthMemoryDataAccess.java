@@ -25,6 +25,9 @@ public class AuthMemoryDataAccess implements AuthDAO {
     }
 
     public void deleteAuth(String authToken) throws ResponseException {
+        if (!auths.containsKey(authToken)) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "Auth token not found");
+        }
         auths.remove(authToken);
     }
 

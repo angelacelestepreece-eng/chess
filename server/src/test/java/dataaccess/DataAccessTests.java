@@ -143,4 +143,26 @@ public class DataAccessTests {
         dao.createGame("AmazingGame");
         assertTrue(dao.getGames().size() >= 2);
     }
+
+    @Test
+    void deleteAuthSuccess() throws Exception {
+        UserData user = new UserData("janie", "password", "email");
+        dao.createUser(user);
+        var auth = dao.createAuth(user);
+        dao.deleteAuth(auth.authToken());
+        assertNull(dao.getAuth(auth.authToken()));
+    }
+
+    @Test
+    void deleteInvalidAuthToken() {
+        assertThrows(ResponseException.class, () -> dao.deleteAuth("invalidToken"));
+    }
+
+    @Test
+    void clearSuccess() throws Exception {
+        dao.createUser(new UserData("angela", "password", "email"));
+        dao.clear();
+        assertNull(dao.getUser("angela"));
+        assertTrue(dao.getGames().isEmpty());
+    }
 }
