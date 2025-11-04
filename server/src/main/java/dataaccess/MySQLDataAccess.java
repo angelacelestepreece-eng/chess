@@ -7,11 +7,20 @@ import model.UserData;
 import java.util.Collection;
 
 public class MySQLDataAccess implements DataAccess {
-    private final UserDAO userDAO = new MySQLUserDAO();
-    private final AuthDAO authDAO = new MySQLAuthDAO();
-    private final GameDAO gameDAO = new MySQLGameDAO();
+
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
 
     public MySQLDataAccess() throws ResponseException {
+        try {
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException e) {
+            throw new ResponseException(ResponseException.Code.ServerError, "Failed to create database: " + e.getMessage());
+        }
+        userDAO = new MySQLUserDAO();
+        authDAO = new MySQLAuthDAO();
+        gameDAO = new MySQLGameDAO();
     }
 
     @Override
