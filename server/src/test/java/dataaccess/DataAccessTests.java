@@ -1,7 +1,7 @@
 package dataaccess;
 
 import chess.*;
-import dataaccess.MemoryDataAccess.MemoryDataAccess;
+import dataaccess.memorydataaccess.MemoryDataAccess;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;

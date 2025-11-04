@@ -1,6 +1,6 @@
 package service;
 
-import dataaccess.MemoryDataAccess.MemoryDataAccess;
+import dataaccess.memorydataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;

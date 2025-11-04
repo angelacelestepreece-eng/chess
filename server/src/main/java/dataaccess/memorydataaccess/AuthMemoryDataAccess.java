@@ -1,4 +1,4 @@
-package dataaccess.MemoryDataAccess;
+package dataaccess.memorydataaccess;
 
 import dataaccess.AuthDAO;
 import dataaccess.ResponseException;

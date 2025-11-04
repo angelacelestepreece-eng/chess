@@ -1,6 +1,6 @@
 package service;
 
-import dataaccess.MemoryDataAccess.MemoryDataAccess;
+import dataaccess.memorydataaccess.MemoryDataAccess;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
