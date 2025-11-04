@@ -1,13 +1,13 @@
 package dataaccess;
 
 import com.google.gson.Gson;
-import dataaccess.ResponseException;
 import model.GameData;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static dataaccess.SQLHelper.executeUpdate;
 import static java.sql.Types.NULL;
 
 public class MySQLGameDAO implements GameDAO {
@@ -112,27 +112,6 @@ public class MySQLGameDAO implements GameDAO {
         } catch (SQLException | DataAccessException e) {
             throw new ResponseException(ResponseException.Code.ServerError,
                     String.format("Unable to insert into game table: %s, %s", statement, e.getMessage()));
-        }
-    }
-
-
-    private int executeUpdate(String statement, Object... params) throws ResponseException {
-        try (Connection conn = DatabaseManager.getConnection();
-             var preparedStatement = conn.prepareStatement(statement)) {
-            for (int i = 0; i < params.length; i++) {
-                Object param = params[i];
-                if (param instanceof String p) {
-                    preparedStatement.setString(i + 1, p);
-                } else if (param instanceof Integer p) {
-                    preparedStatement.setInt(i + 1, p);
-                } else if (param == null) {
-                    preparedStatement.setNull(i + 1, NULL);
-                }
-            }
-            return preparedStatement.executeUpdate();
-        } catch (SQLException | DataAccessException e) {
-            throw new ResponseException(ResponseException.Code.ServerError,
-                    String.format("Unable to update game table: %s, %s", statement, e.getMessage()));
         }
     }
 

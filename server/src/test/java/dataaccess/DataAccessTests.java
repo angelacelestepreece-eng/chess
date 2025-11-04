@@ -80,6 +80,11 @@ public class DataAccessTests {
     }
 
     @Test
+    void getEmptyGames() throws Exception {
+        assertTrue(dao.getGames().isEmpty());
+    }
+
+    @Test
     void getGameBadID() throws Exception {
         assertNull(dao.getGame(124));
     }

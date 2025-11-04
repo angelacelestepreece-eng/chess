@@ -1,13 +1,12 @@
 package dataaccess;
 
-import com.google.gson.Gson;
-import dataaccess.ResponseException;
 import model.AuthData;
 import model.UserData;
 
 import java.sql.*;
 import java.util.UUID;
 
+import static dataaccess.SQLHelper.executeUpdate;
 import static java.sql.Types.NULL;
 
 public class MySQLAuthDAO implements AuthDAO {
@@ -58,26 +57,6 @@ public class MySQLAuthDAO implements AuthDAO {
     public void clear() throws ResponseException {
         var statement = "TRUNCATE auth";
         executeUpdate(statement);
-    }
-
-    private int executeUpdate(String statement, Object... params) throws ResponseException {
-        try (Connection conn = DatabaseManager.getConnection();
-             var preparedStatement = conn.prepareStatement(statement)) {
-            for (int i = 0; i < params.length; i++) {
-                Object param = params[i];
-                if (param instanceof String p) {
-                    preparedStatement.setString(i + 1, p);
-                } else if (param instanceof Integer p) {
-                    preparedStatement.setInt(i + 1, p);
-                } else if (param == null) {
-                    preparedStatement.setNull(i + 1, NULL);
-                }
-            }
-            return preparedStatement.executeUpdate();
-        } catch (SQLException | DataAccessException e) {
-            throw new ResponseException(ResponseException.Code.ServerError,
-                    String.format("Unable to Update auth table: %s, %s", statement, e.getMessage()));
-        }
     }
 
     private final String[] createStatements = {

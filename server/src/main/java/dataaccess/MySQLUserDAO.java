@@ -1,12 +1,11 @@
 package dataaccess;
 
 import model.UserData;
-import dataaccess.ResponseException;
-import com.google.gson.Gson;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
+import static dataaccess.SQLHelper.executeUpdate;
 import static java.sql.Types.NULL;
 
 public class MySQLUserDAO implements UserDAO {
@@ -52,32 +51,6 @@ public class MySQLUserDAO implements UserDAO {
         var password = rs.getString("password");
         var email = rs.getString("email");
         return new UserData(username, password, email);
-    }
-
-    private int executeUpdate(String statement, Object... params) throws ResponseException {
-        Connection conn = null;
-        try {
-            conn = DatabaseManager.getConnection();
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) {
-                        preparedStatement.setString(i + 1, p);
-                    } else if (param instanceof Integer p) {
-                        preparedStatement.setInt(i + 1, p);
-                    } else if (param == null) {
-                        preparedStatement.setNull(i + 1, NULL);
-                    }
-                }
-                return preparedStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new ResponseException(ResponseException.Code.ServerError,
-                    String.format("SQL error during update: %s, %s", statement, e.getMessage()));
-        } catch (DataAccessException e) {
-            throw new ResponseException(ResponseException.Code.ServerError,
-                    String.format("Connection error during update: %s, %s", statement, e.getMessage()));
-        }
     }
 
 
