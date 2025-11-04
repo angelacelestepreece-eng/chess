@@ -9,6 +9,8 @@ import model.GameData;
 
 import java.util.Collection;
 
+import static service.ServiceHelper.*;
+
 public class GameService {
     private final DataAccess dataAccess;
 
@@ -17,55 +19,35 @@ public class GameService {
     }
 
     public ListGamesResult listGames(String authToken) throws ServiceException {
-        if (authToken == null || authToken.isBlank()) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
+        AuthData authData = validateAuth(dataAccess, authToken);
 
         try {
-            AuthData authData = dataAccess.getAuth(authToken);
-            if (authData == null) {
-                throw new ServiceException(401, "Error: unauthorized");
-            }
             Collection<GameData> games = dataAccess.getGames();
             return new ListGamesResult(games);
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 
     public CreateGameResult createGame(String gameName, String authToken) throws ServiceException {
-        if (gameName == null || gameName.isBlank()) {
-            throw new ServiceException(400, "Error: bad request");
-        }
-        if (authToken == null || authToken.isBlank()) {
-            throw new ServiceException(401, "Error: unauthorized");
-        }
+        validateNotBlank(gameName, 400, "Error: bad request");
+        AuthData authData = validateAuth(dataAccess, authToken);
 
         try {
-            AuthData authData = dataAccess.getAuth(authToken);
-            if (authData == null) {
-                throw new ServiceException(401, "Error: unauthorized");
-            }
             GameData gameData = dataAccess.createGame(gameName);
-            int gameID = gameData.gameID();
-            return new CreateGameResult(gameID);
+            return new CreateGameResult(gameData.gameID());
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 
     public void joinGame(String authToken, String playerColor, int gameID) throws ServiceException {
-        if (authToken == null || authToken.isBlank() || playerColor == null || playerColor.isBlank()) {
-            throw new ServiceException(400, "Error: bad request");
-        }
+        validateNotBlank(authToken, 400, "Error: bad request");
+        validateNotBlank(playerColor, 400, "Error: bad request");
+
+        AuthData authData = validateAuth(dataAccess, authToken);
 
         try {
-            AuthData authData = dataAccess.getAuth(authToken);
-            if (authData == null) {
-                throw new ServiceException(401, "Error: unauthorized");
-            }
             GameData game = dataAccess.getGame(gameID);
             if (game == null) {
                 throw new ServiceException(400, "Error: bad request");
@@ -92,8 +74,7 @@ public class GameService {
 
             dataAccess.updateGame(updatedGame);
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 
@@ -101,8 +82,7 @@ public class GameService {
         try {
             dataAccess.clear();
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 }

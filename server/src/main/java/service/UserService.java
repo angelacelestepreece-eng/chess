@@ -11,6 +11,8 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.awt.image.BandCombineOp;
 import java.security.Provider;
 
+import static service.ServiceHelper.*;
+
 
 public class UserService {
     private final DataAccess dataAccess;
@@ -20,10 +22,9 @@ public class UserService {
     }
 
     public RegistrationResult register(UserData user) throws ServiceException {
-        if (user.username() == null || user.password() == null || user.email() == null ||
-                user.username().isBlank() || user.password().isBlank() || user.email().isBlank()) {
-            throw new ServiceException(400, "Error: bad request");
-        }
+        validateNotBlank(user.username(), 400, "Error: bad request");
+        validateNotBlank(user.password(), 400, "Error: bad request");
+        validateNotBlank(user.email(), 400, "Error: bad request");
 
         try {
             if (dataAccess.getUser(user.username()) != null) {
@@ -34,16 +35,13 @@ public class UserService {
             AuthData auth = dataAccess.createAuth(user);
             return new RegistrationResult(auth.username(), auth.authToken());
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 
     public LoginResult login(UserData user) throws ServiceException {
-        if (user.username() == null || user.password() == null ||
-                user.username().isBlank() || user.password().isBlank()) {
-            throw new ServiceException(400, "Error: bad request");
-        }
+        validateNotBlank(user.username(), 400, "Error: bad request");
+        validateNotBlank(user.password(), 400, "Error: bad request");
 
         try {
             UserData registeredUser = dataAccess.getUser(user.username());
@@ -56,23 +54,16 @@ public class UserService {
             AuthData auth = dataAccess.createAuth(registeredUser);
             return new LoginResult(auth.username(), auth.authToken());
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 
     public void logout(String authToken) throws ServiceException {
+        validateAuth(dataAccess, authToken);
         try {
-            AuthData authData = dataAccess.getAuth(authToken);
-
-            if (authData == null) {
-                throw new ServiceException(401, "Error: unauthorized");
-            }
-
             dataAccess.deleteAuth(authToken);
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 
@@ -80,8 +71,7 @@ public class UserService {
         try {
             dataAccess.clear();
         } catch (ResponseException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "Internal Server Error";
-            throw new ServiceException(500, "Error: " + msg);
+            throw wrap(e);
         }
     }
 }

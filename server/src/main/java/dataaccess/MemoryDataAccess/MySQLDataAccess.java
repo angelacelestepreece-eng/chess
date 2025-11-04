@@ -1,5 +1,6 @@
-package dataaccess;
+package dataaccess.MemoryDataAccess;
 
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;

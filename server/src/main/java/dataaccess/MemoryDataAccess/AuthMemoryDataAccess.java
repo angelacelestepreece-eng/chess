@@ -1,5 +1,7 @@
-package dataaccess;
+package dataaccess.MemoryDataAccess;
 
+import dataaccess.AuthDAO;
+import dataaccess.ResponseException;
 import model.AuthData;
 import model.UserData;
 
