@@ -77,4 +77,5 @@ public class UserServiceTests {
         assertNull(dao.getUser("jennifer"));
         assertNull(dao.getAuth(result.authToken()));
     }
+
 }
