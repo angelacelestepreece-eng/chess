@@ -5,13 +5,21 @@ import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import datamodel.LoginResult;
+import datamodel.RegistrationResult;
 import exception.ResponseException;
+import server.ServerFacade;
 
 import static ui.EscapeSequences.*;
 
 public class PreLoginClient {
     private String visitorName = null;
     private State state = State.SIGNEDOUT;
+    private final String serverUrl;
+
+    public PreLoginClient(String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
 
     public void run() {
         System.out.println("♕ Welcome to 240 chess. Type Help to get started. ♕");
@@ -57,9 +65,11 @@ public class PreLoginClient {
 
     public String login(String... params) throws ResponseException {
         if (params.length >= 2) {
-            state = State.SIGNEDIN;
-            visitorName = String.join("-", params);
-            new PostLoginClient(visitorName).run();
+            String username = params[0];
+            String password = params[1];
+            ServerFacade server = new ServerFacade(serverUrl);
+            LoginResult result = server.login(username, password);
+            new PostLoginClient(result.username(), serverUrl, server).run();
             return "quit";
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD>");
@@ -67,12 +77,15 @@ public class PreLoginClient {
 
     public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
-            state = State.SIGNEDIN;
-            visitorName = String.join("-", params);
-            new PostLoginClient(visitorName).run();
+            String username = params[0];
+            String password = params[1];
+            String email = params[2];
+            ServerFacade server = new ServerFacade(serverUrl);
+            RegistrationResult result = server.register(username, password, email);
+            new PostLoginClient(result.username(), serverUrl, server).run();
             return "quit";
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "Expected:  <USERNAME> <PASSWORD> <EMAIL>");
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
     }
 
 

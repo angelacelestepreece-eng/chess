@@ -1,6 +1,4 @@
 import chess.*;
-import ui.GamePlayClient;
-import ui.PostLoginClient;
 import ui.PreLoginClient;
 
 public class Main {
@@ -11,7 +9,7 @@ public class Main {
         }
 
         try {
-            new PreLoginClient().run();
+            new PreLoginClient(serverUrl).run();
 
         } catch (Throwable ex) {
             System.out.printf("Unable to start server: %s%n", ex.getMessage());
