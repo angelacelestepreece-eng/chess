@@ -1,7 +1,6 @@
 package ui;
 
 import java.util.Arrays;
-import java.util.Scanner;
 
 import datamodel.CreateGameResult;
 import datamodel.ListGamesResult;
@@ -9,9 +8,7 @@ import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
 
-import static ui.EscapeSequences.*;
-
-public class PostLoginClient {
+public class PostLoginClient extends StandardClient {
     private State state = State.SIGNEDIN;
     private final String username;
     private final ServerFacade server;
@@ -24,28 +21,7 @@ public class PostLoginClient {
     }
 
     public void run() {
-        System.out.printf("Logged in as %s%n", username);
-
-        Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while (!result.equals("quit")) {
-            printPrompt();
-            String line = scanner.nextLine();
-
-            try {
-                result = eval(line);
-                if (!result.equals("quit")) {
-                    System.out.print(BLUE + result);
-                }
-            } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(msg);
-            }
-        }
-    }
-
-    private void printPrompt() {
-        System.out.print("\n" + RESET + ">>> " + GREEN);
+        runLoop("Logged in as" + username);
     }
 
     public String eval(String input) {

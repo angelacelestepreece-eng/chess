@@ -1,16 +1,14 @@
 package ui;
 
 import java.util.Arrays;
-import java.util.Scanner;
 
 import datamodel.LoginResult;
 import datamodel.RegistrationResult;
 import exception.ResponseException;
 import server.ServerFacade;
 
-import static ui.EscapeSequences.*;
 
-public class PreLoginClient {
+public class PreLoginClient extends StandardClient {
     private String visitorName = null;
     private State state = State.SIGNEDOUT;
     private final String serverUrl;
@@ -20,29 +18,7 @@ public class PreLoginClient {
     }
 
     public void run() {
-        System.out.println("♕ Welcome to 240 chess. Type Help to get started. ♕");
-
-        Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while (!result.equals("quit")) {
-            printPrompt();
-            String line = scanner.nextLine();
-
-            try {
-                result = eval(line);
-                if (!result.equals("quit")) {
-                    System.out.print(BLUE + result);
-                }
-            } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(msg);
-            }
-        }
-    }
-
-
-    private void printPrompt() {
-        System.out.print("\n" + RESET + ">>> " + GREEN);
+        runLoop("♕ Welcome to 240 chess. Type Help to get started. ♕");
     }
 
 
