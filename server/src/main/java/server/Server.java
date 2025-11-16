@@ -1,16 +1,16 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccess;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 import datamodel.*;
 import exception.ResponseException;
-import io.javalin.*;
-import io.javalin.http.Context;
+import dataaccess.DataAccess;
+import dataaccess.MySQLDataAccess;
 import model.UserData;
 import service.GameService;
-import service.ServiceException;
 import service.UserService;
-import dataaccess.MySQLDataAccess;
+import service.ServiceException;
 
 public class Server {
 
