@@ -59,7 +59,7 @@ public class PostLoginClient {
                 case "logout" -> logout();
                 case "quit" -> "quit";
                 case "help" -> help();
-                case "" -> ""; // empty line
+                case "" -> "";
                 default -> "Unknown command. Type 'help' for options.";
             };
         } catch (ResponseException ex) {
@@ -100,7 +100,6 @@ public class PostLoginClient {
     public String observeGame(String... params) throws ResponseException {
         if (params.length >= 1) {
             int gameId = Integer.parseInt(params[0]);
-            // If you add observeGame to ServerFacade, call it here
             return drawBoard("WHITE");
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <ID>");
@@ -125,25 +124,26 @@ public class PostLoginClient {
 
     private String pieceSymbol(String piece) {
         return switch (piece) {
-            case "wK" -> WHITE_KING;
-            case "wQ" -> WHITE_QUEEN;
-            case "wR" -> WHITE_ROOK;
-            case "wB" -> WHITE_BISHOP;
-            case "wN" -> WHITE_KNIGHT;
-            case "wP" -> WHITE_PAWN;
-            case "bK" -> BLACK_KING;
-            case "bQ" -> BLACK_QUEEN;
-            case "bR" -> BLACK_ROOK;
-            case "bB" -> BLACK_BISHOP;
-            case "bN" -> BLACK_KNIGHT;
-            case "bP" -> BLACK_PAWN;
-            default -> EMPTY;
+            case "wK" -> " K ";
+            case "wQ" -> " Q ";
+            case "wR" -> " R ";
+            case "wB" -> " B ";
+            case "wN" -> " N ";
+            case "wP" -> " P ";
+            case "bK" -> " k ";
+            case "bQ" -> " q ";
+            case "bR" -> " r ";
+            case "bB" -> " b ";
+            case "bN" -> " n ";
+            case "bP" -> " p ";
+            default -> "   ";
         };
     }
 
     private String drawBoard(String perspective) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ERASE_SCREEN);
+        sb.append(EscapeSequences.ERASE_SCREEN);
+
         boolean whitePerspective = perspective.equalsIgnoreCase("WHITE") || perspective.equalsIgnoreCase("OBSERVER");
         int startRow = whitePerspective ? 7 : 0;
         int endRow = whitePerspective ? -1 : 8;
@@ -152,17 +152,17 @@ public class PostLoginClient {
         int endCol = whitePerspective ? 8 : -1;
         int stepCol = whitePerspective ? 1 : -1;
         for (int row = startRow; row != endRow; row += stepRow) {
-            sb.append((whitePerspective ? row + 1 : 8 - row)).append(" "); // rank labels
+            sb.append(row + 1).append(" ");
             for (int col = startCol; col != endCol; col += stepCol) {
-                boolean lightSquare = (row + col) % 2 == 0;
-                String bgColor = lightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+                boolean lightSquare = (row + col) % 2 != 0;
+                String bgColor = lightSquare ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY : EscapeSequences.SET_BG_COLOR_DARK_GREY;
                 sb.append(bgColor)
                         .append(pieceSymbol(initialBoard[row][col]))
-                        .append(RESET_BG_COLOR);
+                        .append(EscapeSequences.RESET_BG_COLOR);
             }
             sb.append("\n");
         }
-        sb.append("   ");
+        sb.append("  ");
         if (whitePerspective) {
             for (char c = 'a'; c <= 'h'; c++) {
                 sb.append(" ").append(c).append(" ");
