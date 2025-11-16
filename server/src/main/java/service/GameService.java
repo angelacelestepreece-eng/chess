@@ -1,11 +1,11 @@
 package service;
 
 import dataaccess.DataAccess;
-import dataaccess.ResponseException;
 import datamodel.CreateGameResult;
 import datamodel.ListGamesResult;
 import model.AuthData;
 import model.GameData;
+import exception.ResponseException;
 
 import java.util.Collection;
 

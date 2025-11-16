@@ -1,12 +1,13 @@
 package dataaccess.memorydataaccess;
 
 import dataaccess.AuthDAO;
-import dataaccess.ResponseException;
 import model.AuthData;
 import model.UserData;
 
 import java.util.HashMap;
 import java.util.UUID;
+
+import exception.ResponseException;
 
 public class AuthMemoryDataAccess implements AuthDAO {
     private final HashMap<String, AuthData> auths = new HashMap<>();
@@ -28,7 +29,7 @@ public class AuthMemoryDataAccess implements AuthDAO {
 
     public void deleteAuth(String authToken) throws ResponseException {
         if (!auths.containsKey(authToken)) {
-            throw new ResponseException(ResponseException.Code.BadRequest, "Auth token not found");
+            throw new ResponseException(ResponseException.Code.ServerError, "Auth token not found");
         }
         auths.remove(authToken);
     }

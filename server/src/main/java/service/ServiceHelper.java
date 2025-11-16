@@ -1,8 +1,8 @@
 package service;
 
 import dataaccess.DataAccess;
-import dataaccess.ResponseException;
 import model.AuthData;
+import exception.ResponseException;
 
 public class ServiceHelper {
 

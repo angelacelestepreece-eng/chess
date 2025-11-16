@@ -5,6 +5,8 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
+import exception.ResponseException;
+
 import static dataaccess.SQLHelper.executeUpdate;
 import static java.sql.Types.NULL;
 

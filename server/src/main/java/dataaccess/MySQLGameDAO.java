@@ -7,6 +7,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import exception.ResponseException;
+
 import static dataaccess.SQLHelper.executeUpdate;
 import static dataaccess.SQLHelper.executeInsert;
 import static java.sql.Types.NULL;

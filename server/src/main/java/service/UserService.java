@@ -1,15 +1,12 @@
 package service;
 
 import dataaccess.DataAccess;
-import dataaccess.ResponseException;
 import datamodel.LoginResult;
 import datamodel.RegistrationResult;
 import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
-
-import java.awt.image.BandCombineOp;
-import java.security.Provider;
+import exception.ResponseException;
 
 import static service.ServiceHelper.*;
 

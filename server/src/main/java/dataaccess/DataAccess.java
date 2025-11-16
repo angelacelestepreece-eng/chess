@@ -6,6 +6,8 @@ import model.UserData;
 
 import java.util.Collection;
 
+import exception.ResponseException;
+
 public interface DataAccess {
     void clear() throws ResponseException;
 

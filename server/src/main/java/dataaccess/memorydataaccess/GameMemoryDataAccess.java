@@ -2,8 +2,8 @@ package dataaccess.memorydataaccess;
 
 import chess.ChessGame;
 import dataaccess.GameDAO;
-import dataaccess.ResponseException;
 import model.GameData;
+import exception.ResponseException;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,14 +26,14 @@ public class GameMemoryDataAccess implements GameDAO {
 
     public void saveGame(GameData game) throws ResponseException {
         if (games.containsKey(game.gameID())) {
-            throw new ResponseException(ResponseException.Code.BadRequest, "Game ID already exists");
+            throw new ResponseException(ResponseException.Code.ServerError, "Game ID already exists");
         }
         games.put(game.gameID(), game);
     }
 
     public void updateGame(GameData game) throws ResponseException {
         if (!games.containsKey(game.gameID())) {
-            throw new ResponseException(ResponseException.Code.NotFound, "Game ID doesn't exist");
+            throw new ResponseException(ResponseException.Code.ServerError, "Game ID doesn't exist");
         }
         games.put(game.gameID(), game);
     }

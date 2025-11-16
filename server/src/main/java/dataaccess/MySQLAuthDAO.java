@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.AuthData;
 import model.UserData;
+import exception.ResponseException;
 
 import java.sql.*;
 import java.util.UUID;
@@ -52,7 +53,7 @@ public class MySQLAuthDAO implements AuthDAO {
         var statement = "DELETE FROM auth WHERE authToken=?";
         int updated = executeUpdate(statement, authToken);
         if (updated == 0) {
-            throw new ResponseException(ResponseException.Code.BadRequest, "Auth token not found");
+            throw new ResponseException(ResponseException.Code.ServerError, "Auth token not found");
         }
     }
 

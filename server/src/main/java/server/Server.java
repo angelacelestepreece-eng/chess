@@ -2,8 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.ResponseException;
 import datamodel.*;
+import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
