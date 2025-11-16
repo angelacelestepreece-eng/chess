@@ -3,7 +3,8 @@ package ui;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import datamodel.*;
+import datamodel.CreateGameResult;
+import datamodel.ListGamesResult;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;

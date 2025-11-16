@@ -8,7 +8,6 @@ import java.sql.*;
 import java.util.UUID;
 
 import static dataaccess.SQLHelper.executeUpdate;
-import static java.sql.Types.NULL;
 
 public class MySQLAuthDAO implements AuthDAO {
 

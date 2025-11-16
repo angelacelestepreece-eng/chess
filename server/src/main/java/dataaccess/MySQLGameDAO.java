@@ -11,7 +11,6 @@ import exception.ResponseException;
 
 import static dataaccess.SQLHelper.executeUpdate;
 import static dataaccess.SQLHelper.executeInsert;
-import static java.sql.Types.NULL;
 
 public class MySQLGameDAO implements GameDAO {
 

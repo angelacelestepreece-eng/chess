@@ -1,9 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
+import datamodel.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import datamodel.*;
 import exception.ResponseException;
 import dataaccess.DataAccess;
 import dataaccess.MySQLDataAccess;
