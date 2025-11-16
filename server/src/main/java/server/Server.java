@@ -10,7 +10,7 @@ import model.UserData;
 import service.GameService;
 import service.ServiceException;
 import service.UserService;
-import dataaccess.memorydataaccess.MySQLDataAccess;
+import dataaccess.MySQLDataAccess;
 
 public class Server {
 
