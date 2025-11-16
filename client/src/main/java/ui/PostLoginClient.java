@@ -100,10 +100,11 @@ public class PostLoginClient {
     public String observeGame(String... params) throws ResponseException {
         if (params.length >= 1) {
             int gameId = Integer.parseInt(params[0]);
-            return drawBoard("WHITE");
+            return drawBoard("OBSERVER");
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <ID>");
     }
+
 
     public String logout() throws ResponseException {
         state = State.SIGNEDOUT;
@@ -112,30 +113,30 @@ public class PostLoginClient {
     }
 
     private final String[][] initialBoard = {
-            {"bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"},
-            {"bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"},
-            {"", "", "", "", "", "", "", ""},
-            {"", "", "", "", "", "", "", ""},
-            {"", "", "", "", "", "", "", ""},
-            {"", "", "", "", "", "", "", ""},
+            {"wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"},
             {"wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"},
-            {"wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"}
+            {"", "", "", "", "", "", "", ""},
+            {"", "", "", "", "", "", "", ""},
+            {"", "", "", "", "", "", "", ""},
+            {"", "", "", "", "", "", "", ""},
+            {"bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"},
+            {"bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"}
     };
 
     private String pieceSymbol(String piece) {
         return switch (piece) {
-            case "wK" -> " K ";
-            case "wQ" -> " Q ";
-            case "wR" -> " R ";
-            case "wB" -> " B ";
-            case "wN" -> " N ";
-            case "wP" -> " P ";
-            case "bK" -> " k ";
-            case "bQ" -> " q ";
-            case "bR" -> " r ";
-            case "bB" -> " b ";
-            case "bN" -> " n ";
-            case "bP" -> " p ";
+            case "wK" -> EscapeSequences.GREEN + " K " + EscapeSequences.BLUE;
+            case "wQ" -> EscapeSequences.GREEN + " Q " + EscapeSequences.BLUE;
+            case "wR" -> EscapeSequences.GREEN + " R " + EscapeSequences.BLUE;
+            case "wB" -> EscapeSequences.GREEN + " B " + EscapeSequences.BLUE;
+            case "wN" -> EscapeSequences.GREEN + " N " + EscapeSequences.BLUE;
+            case "wP" -> EscapeSequences.GREEN + " P " + EscapeSequences.BLUE;
+            case "bK" -> EscapeSequences.RED + " k " + EscapeSequences.BLUE;
+            case "bQ" -> EscapeSequences.RED + " q " + EscapeSequences.BLUE;
+            case "bR" -> EscapeSequences.RED + " r " + EscapeSequences.BLUE;
+            case "bB" -> EscapeSequences.RED + " b " + EscapeSequences.BLUE;
+            case "bN" -> EscapeSequences.RED + " n " + EscapeSequences.BLUE;
+            case "bP" -> EscapeSequences.RED + " p " + EscapeSequences.BLUE;
             default -> "   ";
         };
     }
@@ -152,10 +153,12 @@ public class PostLoginClient {
         int endCol = whitePerspective ? 8 : -1;
         int stepCol = whitePerspective ? 1 : -1;
         for (int row = startRow; row != endRow; row += stepRow) {
-            sb.append(row + 1).append(" ");
+            int rank = whitePerspective ? row + 1 : 8 - row;
+            sb.append(rank).append(" ");
             for (int col = startCol; col != endCol; col += stepCol) {
                 boolean lightSquare = (row + col) % 2 != 0;
-                String bgColor = lightSquare ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY : EscapeSequences.SET_BG_COLOR_DARK_GREY;
+                String bgColor = lightSquare ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
+                        : EscapeSequences.SET_BG_COLOR_DARK_GREY;
                 sb.append(bgColor)
                         .append(pieceSymbol(initialBoard[row][col]))
                         .append(EscapeSequences.RESET_BG_COLOR);
@@ -163,14 +166,8 @@ public class PostLoginClient {
             sb.append("\n");
         }
         sb.append("  ");
-        if (whitePerspective) {
-            for (char c = 'a'; c <= 'h'; c++) {
-                sb.append(" ").append(c).append(" ");
-            }
-        } else {
-            for (char c = 'h'; c >= 'a'; c--) {
-                sb.append(" ").append(c).append(" ");
-            }
+        for (char c = 'a'; c <= 'h'; c++) {
+            sb.append(" ").append(c).append(" ");
         }
         sb.append("\n");
 
