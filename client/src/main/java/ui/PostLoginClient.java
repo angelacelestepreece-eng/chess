@@ -112,10 +112,71 @@ public class PostLoginClient {
         return "quit";
     }
 
-    private String drawBoard(String perspective) {
-        // TODO: implement actual board rendering
-        return String.format("Drawing board from %s perspective...%n", perspective);
+    private final String[][] initialBoard = {
+            {"bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"},
+            {"bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"},
+            {"", "", "", "", "", "", "", ""},
+            {"", "", "", "", "", "", "", ""},
+            {"", "", "", "", "", "", "", ""},
+            {"", "", "", "", "", "", "", ""},
+            {"wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"},
+            {"wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"}
+    };
+
+    private String pieceSymbol(String piece) {
+        return switch (piece) {
+            case "wK" -> WHITE_KING;
+            case "wQ" -> WHITE_QUEEN;
+            case "wR" -> WHITE_ROOK;
+            case "wB" -> WHITE_BISHOP;
+            case "wN" -> WHITE_KNIGHT;
+            case "wP" -> WHITE_PAWN;
+            case "bK" -> BLACK_KING;
+            case "bQ" -> BLACK_QUEEN;
+            case "bR" -> BLACK_ROOK;
+            case "bB" -> BLACK_BISHOP;
+            case "bN" -> BLACK_KNIGHT;
+            case "bP" -> BLACK_PAWN;
+            default -> EMPTY;
+        };
     }
+
+    private String drawBoard(String perspective) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ERASE_SCREEN);
+        boolean whitePerspective = perspective.equalsIgnoreCase("WHITE") || perspective.equalsIgnoreCase("OBSERVER");
+        int startRow = whitePerspective ? 7 : 0;
+        int endRow = whitePerspective ? -1 : 8;
+        int stepRow = whitePerspective ? -1 : 1;
+        int startCol = whitePerspective ? 0 : 7;
+        int endCol = whitePerspective ? 8 : -1;
+        int stepCol = whitePerspective ? 1 : -1;
+        for (int row = startRow; row != endRow; row += stepRow) {
+            sb.append((whitePerspective ? row + 1 : 8 - row)).append(" "); // rank labels
+            for (int col = startCol; col != endCol; col += stepCol) {
+                boolean lightSquare = (row + col) % 2 == 0;
+                String bgColor = lightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+                sb.append(bgColor)
+                        .append(pieceSymbol(initialBoard[row][col]))
+                        .append(RESET_BG_COLOR);
+            }
+            sb.append("\n");
+        }
+        sb.append("   ");
+        if (whitePerspective) {
+            for (char c = 'a'; c <= 'h'; c++) {
+                sb.append(" ").append(c).append(" ");
+            }
+        } else {
+            for (char c = 'h'; c >= 'a'; c--) {
+                sb.append(" ").append(c).append(" ");
+            }
+        }
+        sb.append("\n");
+
+        return sb.toString();
+    }
+
 
     public String help() {
         return """
