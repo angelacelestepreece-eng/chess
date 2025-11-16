@@ -33,13 +33,14 @@ public class PostLoginClient {
 
             try {
                 result = eval(line);
-                System.out.print(BLUE + result);
+                if (!result.equals("quit")) {
+                    System.out.print(BLUE + result);
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
-        System.out.println();
     }
 
     private void printPrompt() {

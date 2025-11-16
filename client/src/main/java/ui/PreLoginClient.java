@@ -32,13 +32,14 @@ public class PreLoginClient {
 
             try {
                 result = eval(line);
-                System.out.print(BLUE + result);
+                if (!result.equals("quit")) {
+                    System.out.print(BLUE + result);
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
-        System.out.println();
     }
 
 
@@ -56,7 +57,9 @@ public class PreLoginClient {
                 case "login" -> login(params);
                 case "register" -> register(params);
                 case "quit" -> "quit";
-                default -> help();
+                case "help" -> help();
+                case "" -> "";
+                default -> "Unknown command. Type 'help' for options.";
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
