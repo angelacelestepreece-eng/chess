@@ -19,14 +19,12 @@ public class ServerFacade {
     private final String serverUrl;
     private final Gson gson = new Gson();
 
-    // store auth token after login/register
     private String authToken;
 
     public ServerFacade(String url) {
         this.serverUrl = url;
     }
 
-    // --- Prelogin ---
     public RegistrationResult register(String username, String password, String email) throws ResponseException {
         var req = new UserData(username, password, email);
         var request = buildRequest("POST", "/user", req, false);
@@ -37,7 +35,7 @@ public class ServerFacade {
     }
 
     public LoginResult login(String username, String password) throws ResponseException {
-        var req = new UserData(username, password, null); // email not needed for login
+        var req = new UserData(username, password, null);
         var request = buildRequest("POST", "/session", req, false);
         var response = sendRequest(request);
         LoginResult result = handleResponse(response, LoginResult.class);
@@ -49,10 +47,9 @@ public class ServerFacade {
         var request = buildRequest("DELETE", "/session", null, true);
         var response = sendRequest(request);
         handleResponse(response, null);
-        this.authToken = null; // clear token
+        this.authToken = null;
     }
 
-    // --- Postlogin ---
     public CreateGameResult createGame(String name) throws ResponseException {
         var req = new CreateGameRequest(name);
         var request = buildRequest("POST", "/game", req, true);
@@ -70,10 +67,16 @@ public class ServerFacade {
         var req = new JoinGameRequest(color, gameId);
         var request = buildRequest("PUT", "/game", req, true);
         var response = sendRequest(request);
-        handleResponse(response, null); // server returns {}
+        handleResponse(response, null);
     }
 
-    // --- Helpers ---
+    public void clear() throws ResponseException {
+        var request = buildRequest("DELETE", "/db", null, false);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
+
     private HttpRequest buildRequest(String method, String path, Object body, boolean needsAuth) {
         var builder = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
