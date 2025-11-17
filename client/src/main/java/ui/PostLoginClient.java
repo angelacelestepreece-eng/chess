@@ -123,7 +123,8 @@ public class PostLoginClient extends StandardClient {
         StringBuilder sb = new StringBuilder();
         sb.append(EscapeSequences.ERASE_SCREEN);
 
-        boolean whitePerspective = perspective.equalsIgnoreCase("WHITE") || perspective.equalsIgnoreCase("OBSERVER");
+        boolean whitePerspective = perspective.equalsIgnoreCase("WHITE")
+                || perspective.equalsIgnoreCase("OBSERVER");
         int startRow = whitePerspective ? 7 : 0;
         int endRow = whitePerspective ? -1 : 8;
         int stepRow = whitePerspective ? -1 : 1;
