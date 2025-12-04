@@ -1,5 +1,7 @@
 package websocket.messages;
 
+import model.GameData;
+
 import java.util.Objects;
 
 /**
@@ -9,7 +11,9 @@ import java.util.Objects;
  * methods.
  */
 public class ServerMessage {
-    ServerMessageType serverMessageType;
+    private final ServerMessageType serverMessageType;
+    private final String messageText;
+    private final GameData gameData;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -19,10 +23,35 @@ public class ServerMessage {
 
     public ServerMessage(ServerMessageType type) {
         this.serverMessageType = type;
+        this.messageText = null;
+        this.gameData = null;
+    }
+
+    public ServerMessage(GameData gameData) {
+        this.serverMessageType = ServerMessageType.LOAD_GAME;
+        this.gameData = gameData;
+        this.messageText = null;
+    }
+
+    public ServerMessage(ServerMessageType type, String messageText) {
+        if (type == ServerMessageType.LOAD_GAME) {
+            throw new IllegalArgumentException("Use the GameData constructor for LOAD_GAME");
+        }
+        this.serverMessageType = type;
+        this.messageText = messageText;
+        this.gameData = null;
     }
 
     public ServerMessageType getServerMessageType() {
         return this.serverMessageType;
+    }
+
+    public String getMessageText() {
+        return messageText;
+    }
+
+    public GameData getGameData() {
+        return gameData;
     }
 
     @Override
