@@ -16,15 +16,17 @@ public class PostLoginClient extends StandardClient {
     private final String username;
     private final ServerFacade server;
     private final String serverUrl;
+    private final String authToken;
 
-    public PostLoginClient(String username, String serverUrl, ServerFacade server) throws ResponseException {
+    public PostLoginClient(String username, String serverUrl, ServerFacade server, String authToken) throws ResponseException {
         this.username = username;
         this.server = server;
         this.serverUrl = serverUrl;
+        this.authToken = authToken;
     }
 
     public void run() {
-        runLoop("Logged in as" + username);
+        runLoop("Logged in as " + username);
     }
 
     public String eval(String input) {
@@ -73,7 +75,9 @@ public class PostLoginClient extends StandardClient {
             int gameId = Integer.parseInt(params[0]);
             String color = params[1].toUpperCase();
             server.joinGame(gameId, color);
-            return drawBoard(color, null);
+            GamePlayClient gameClient = new GamePlayClient(username, serverUrl, server, color, gameId, authToken);
+            gameClient.run();
+            return username + " joined game " + gameId + " as " + color;
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <ID> <WHITE|BLACK>");
     }
@@ -81,7 +85,10 @@ public class PostLoginClient extends StandardClient {
     public String observeGame(String... params) throws ResponseException {
         if (params.length >= 1) {
             int gameId = Integer.parseInt(params[0]);
-            return drawBoard("OBSERVER", null);
+            GamePlayClient gameClient = new GamePlayClient(username, serverUrl, server, "OBSERVER", gameId,
+                    authToken);
+            gameClient.run();
+            return username + " is now observing game " + gameId;
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <ID>");
     }
