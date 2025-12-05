@@ -12,8 +12,9 @@ import java.util.Objects;
  */
 public class ServerMessage {
     private final ServerMessageType serverMessageType;
-    private final String messageText;
-    private final GameData gameData;
+    private final String message;
+    private final String errorMessage;
+    private final GameData game;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -23,35 +24,49 @@ public class ServerMessage {
 
     public ServerMessage(ServerMessageType type) {
         this.serverMessageType = type;
-        this.messageText = null;
-        this.gameData = null;
+        this.message = null;
+        this.game = null;
+        this.errorMessage = null;
     }
 
-    public ServerMessage(GameData gameData) {
+    public ServerMessage(GameData game) {
         this.serverMessageType = ServerMessageType.LOAD_GAME;
-        this.gameData = gameData;
-        this.messageText = null;
+        this.game = game;
+        this.message = null;
+        this.errorMessage = null;
     }
 
-    public ServerMessage(ServerMessageType type, String messageText) {
+    public ServerMessage(String message) {
+        this.serverMessageType = ServerMessageType.NOTIFICATION;
+        this.message = message;
+        this.errorMessage = null;
+        this.game = null;
+    }
+
+    public ServerMessage(ServerMessageType type, String errorMessage) {
         if (type == ServerMessageType.LOAD_GAME) {
-            throw new IllegalArgumentException("Use the GameData constructor for LOAD_GAME");
+            throw new IllegalArgumentException("This constructor is only for ERROR messages");
         }
         this.serverMessageType = type;
-        this.messageText = messageText;
-        this.gameData = null;
+        this.message = null;
+        this.game = null;
+        this.errorMessage = errorMessage;
     }
 
     public ServerMessageType getServerMessageType() {
         return this.serverMessageType;
     }
 
-    public String getMessageText() {
-        return messageText;
+    public String getMessage() {
+        return message;
     }
 
-    public GameData getGameData() {
-        return gameData;
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public GameData getGame() {
+        return game;
     }
 
     @Override
