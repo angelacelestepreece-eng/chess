@@ -98,130 +98,146 @@ public class Server {
 
     private void handleCommand(WsContext ctx, UserGameCommand command) {
         switch (command.getCommandType()) {
-            case CONNECT -> {
-                gameSessions
-                        .computeIfAbsent(command.getGameID(), id -> new ConcurrentHashMap<>())
-                        .put(command.getAuthToken(), ctx);
-
-                try {
-                    AuthData authData = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
-                    GameData gameData = gameService.getGame(command.getGameID());
-                    ServerMessage loadGame = new ServerMessage(gameData);
-                    safeSend(ctx, loadGame);
-                    String username = authData.username();
-                    String color = username.equals(gameData.whiteUsername()) ? "white" : "black";
-                    ServerMessage notify = new ServerMessage(username + " joined the game as " + color);
-                    broadcast(command.getGameID(), notify, command.getAuthToken());
-                } catch (ServiceException e) {
-                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
-                    safeSend(ctx, error);
-                }
-            }
-
-            case MAKE_MOVE -> {
-                try {
-                    ChessMove move = command.getMove();
-                    if (move == null) {
-                        throw new ServiceException(400, "Error: missing move");
-                    }
-                    AuthData authData = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
-                    GameData gameData = gameService.getGame(command.getGameID());
-                    if (gameData.game() == null) {
-                        throw new ServiceException(400, "Error: game is over");
-                    }
-
-                    String username = authData.username();
-                    String white = gameData.whiteUsername();
-                    String black = gameData.blackUsername();
-                    boolean isWhite = username != null && username.equals(white);
-                    boolean isBlack = username != null && username.equals(black);
-                    if (!isWhite && !isBlack) {
-                        throw new ServiceException(400, "Error: unauthorized");
-                    }
-
-                    ChessGame.TeamColor turn = gameData.game().getTeamTurn();
-                    if ((turn == ChessGame.TeamColor.WHITE && !isWhite) ||
-                            (turn == ChessGame.TeamColor.BLACK && !isBlack)) {
-                        throw new ServiceException(400, "Error: invalid move");
-                    }
-                    gameService.makeMove(command.getAuthToken(), command.getGameID(), move);
-                    GameData updatedGame = gameService.getGame(command.getGameID());
-                    ServerMessage loadGame = new ServerMessage(updatedGame);
-                    broadcast(command.getGameID(), loadGame, null);
-                    ServerMessage notify = new ServerMessage(username + " made a move");
-                    broadcast(command.getGameID(), notify, command.getAuthToken());
-
-                } catch (ServiceException e) {
-                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
-                    safeSend(ctx, error);
-                }
-            }
-
-            case LEAVE -> {
-                Map<String, WsContext> sessions = gameSessions.get(command.getGameID());
-                if (sessions != null) {
-                    sessions.remove(command.getAuthToken());
-                }
-                try {
-                    AuthData authData = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
-                    GameData gameData = gameService.getGame(command.getGameID());
-                    String username = authData.username();
-
-                    GameData updated;
-                    if (username.equals(gameData.whiteUsername())) {
-                        updated = new GameData(gameData.gameID(), null, gameData.blackUsername(),
-                                gameData.gameName(), gameData.game());
-                    } else if (username.equals(gameData.blackUsername())) {
-                        updated = new GameData(gameData.gameID(), gameData.whiteUsername(), null,
-                                gameData.gameName(), gameData.game());
-                    } else {
-                        updated = gameData;
-                    }
-                    gameService.updateGame(updated);
-
-                    ServerMessage notify = new ServerMessage(username + " left the game");
-                    broadcast(command.getGameID(), notify, command.getAuthToken());
-                } catch (ServiceException e) {
-                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
-                    safeSend(ctx, error);
-                }
-            }
-
-            case RESIGN -> {
-                try {
-                    AuthData authData = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
-                    GameData gameData = gameService.getGame(command.getGameID());
-                    String username = authData.username();
-
-                    String white = gameData.whiteUsername();
-                    String black = gameData.blackUsername();
-                    boolean isWhite = username.equals(white);
-                    boolean isBlack = username.equals(black);
-                    if (!isWhite && !isBlack) {
-                        throw new ServiceException(400, "Error: unauthorized");
-                    }
-                    if (gameData.game() == null) {
-                        throw new ServiceException(400, "Error: game is over");
-                    }
-                    gameService.resignGame(command.getAuthToken(), command.getGameID());
-                    GameData freed = new GameData(
-                            gameData.gameID(),
-                            isWhite ? null : gameData.whiteUsername(),
-                            isBlack ? null : gameData.blackUsername(),
-                            gameData.gameName(),
-                            null
-                    );
-                    gameService.updateGame(freed);
-                    ServerMessage notify = new ServerMessage(username + " resigned");
-                    broadcast(command.getGameID(), notify, null);
-
-                } catch (ServiceException e) {
-                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
-                    safeSend(ctx, error);
-                }
-            }
-
+            case CONNECT -> handleConnect(ctx, command);
+            case MAKE_MOVE -> handleMakeMove(ctx, command);
+            case LEAVE -> handleLeave(ctx, command);
+            case RESIGN -> handleResign(ctx, command);
         }
+    }
+
+    private void handleConnect(WsContext ctx, UserGameCommand command) {
+        gameSessions.computeIfAbsent(command.getGameID(), id -> new ConcurrentHashMap<>())
+                .put(command.getAuthToken(), ctx);
+        try {
+            AuthData auth = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
+            GameData game = gameService.getGame(command.getGameID());
+
+            safeSend(ctx, new ServerMessage(game));
+
+            String username = auth.username();
+            String color = username.equals(game.whiteUsername()) ? "white" : "black";
+            broadcast(command.getGameID(),
+                    new ServerMessage(username + " joined the game as " + color),
+                    command.getAuthToken());
+        } catch (ServiceException e) {
+            safeSend(ctx, new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+        }
+    }
+
+    private void handleMakeMove(WsContext ctx, UserGameCommand command) {
+        try {
+            ChessMove move = command.getMove();
+            if (move == null) {
+                throw new ServiceException(400, "Error: missing move");
+            }
+
+            AuthData auth = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
+            GameData game = gameService.getGame(command.getGameID());
+
+            // validate turn + player
+            validateMoveTurn(auth.username(), game);
+
+            gameService.makeMove(command.getAuthToken(), command.getGameID(), move);
+            GameData updated = gameService.getGame(command.getGameID());
+
+            broadcast(command.getGameID(), new ServerMessage(updated), null);
+            broadcast(command.getGameID(),
+                    new ServerMessage(auth.username() + " made a move"),
+                    command.getAuthToken());
+        } catch (ServiceException e) {
+            safeSend(ctx, new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+        }
+    }
+
+    private void handleLeave(WsContext ctx, UserGameCommand command) {
+        Map<String, WsContext> sessions = gameSessions.get(command.getGameID());
+        if (sessions != null) {
+            sessions.remove(command.getAuthToken());
+        }
+
+        try {
+            AuthData auth = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
+            GameData game = gameService.getGame(command.getGameID());
+
+            GameData updated = removePlayerFromGame(auth.username(), game);
+            gameService.updateGame(updated);
+
+            broadcast(command.getGameID(),
+                    new ServerMessage(auth.username() + " left the game"),
+                    command.getAuthToken());
+        } catch (ServiceException e) {
+            safeSend(ctx, new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+        }
+    }
+
+    private void handleResign(WsContext ctx, UserGameCommand command) {
+        try {
+            AuthData auth = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
+            GameData game = gameService.getGame(command.getGameID());
+
+            validateResign(auth.username(), game);
+
+            gameService.resignGame(command.getAuthToken(), command.getGameID());
+            GameData freed = freeGameSlot(auth.username(), game);
+            gameService.updateGame(freed);
+
+            broadcast(command.getGameID(),
+                    new ServerMessage(auth.username() + " resigned"),
+                    null);
+        } catch (ServiceException e) {
+            safeSend(ctx, new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage()));
+        }
+    }
+
+    private void validateMoveTurn(String username, GameData game) throws ServiceException {
+        if (game.game() == null) {
+            throw new ServiceException(400, "Error: game is over");
+        }
+
+        String white = game.whiteUsername();
+        String black = game.blackUsername();
+        boolean isWhite = username.equals(white);
+        boolean isBlack = username.equals(black);
+
+        if (!isWhite && !isBlack) {
+            throw new ServiceException(400, "Error: unauthorized");
+        }
+
+        ChessGame.TeamColor turn = game.game().getTeamTurn();
+        if ((turn == ChessGame.TeamColor.WHITE && !isWhite) ||
+                (turn == ChessGame.TeamColor.BLACK && !isBlack)) {
+            throw new ServiceException(400, "Error: invalid move");
+        }
+    }
+
+    private GameData removePlayerFromGame(String username, GameData game) {
+        if (username.equals(game.whiteUsername())) {
+            return new GameData(game.gameID(), null, game.blackUsername(),
+                    game.gameName(), game.game());
+        } else if (username.equals(game.blackUsername())) {
+            return new GameData(game.gameID(), game.whiteUsername(), null,
+                    game.gameName(), game.game());
+        }
+        return game;
+    }
+
+    private void validateResign(String username, GameData game) throws ServiceException {
+        if (game.game() == null) {
+            throw new ServiceException(400, "Error: game is over");
+        }
+        if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
+            throw new ServiceException(400, "Error: unauthorized");
+        }
+    }
+
+    private GameData freeGameSlot(String username, GameData game) {
+        boolean isWhite = username.equals(game.whiteUsername());
+        boolean isBlack = username.equals(game.blackUsername());
+        return new GameData(game.gameID(),
+                isWhite ? null : game.whiteUsername(),
+                isBlack ? null : game.blackUsername(),
+                game.gameName(),
+                null);
     }
 
     private void broadcast(int gameID, ServerMessage msg, String excludeAuthToken) {

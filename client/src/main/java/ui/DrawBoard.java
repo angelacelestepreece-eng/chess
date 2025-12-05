@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class DrawBoard {
 
-    private static final String[][] initialBoard = {
+    private static final String[][] INITIAL_BOARD = {
             {"wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"},
             {"wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"},
             {"", "", "", "", "", "", "", ""},
@@ -87,7 +87,7 @@ public class DrawBoard {
                 boolean highlight = highlights != null && highlights.contains(square);
 
                 sb.append(bgColor)
-                        .append(pieceSymbol(initialBoard[row][col], highlight))
+                        .append(pieceSymbol(INITIAL_BOARD[row][col], highlight))
                         .append(EscapeSequences.RESET_BG_COLOR);
             }
             sb.append("\n");
