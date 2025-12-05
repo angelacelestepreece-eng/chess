@@ -46,7 +46,7 @@ public class PreLoginClient extends StandardClient {
             String password = params[1];
             ServerFacade server = new ServerFacade(serverUrl);
             LoginResult result = server.login(username, password);
-            new PostLoginClient(result.username(), serverUrl, server).run();
+            new PostLoginClient(result.username(), serverUrl, server, result.authToken()).run();
             return "quit";
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD>");
@@ -59,7 +59,7 @@ public class PreLoginClient extends StandardClient {
             String email = params[2];
             ServerFacade server = new ServerFacade(serverUrl);
             RegistrationResult result = server.register(username, password, email);
-            new PostLoginClient(result.username(), serverUrl, server).run();
+            new PostLoginClient(result.username(), serverUrl, server, result.authToken()).run();
             return "quit";
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
