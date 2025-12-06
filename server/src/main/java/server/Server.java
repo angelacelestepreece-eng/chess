@@ -130,16 +130,11 @@ public class Server {
             if (move == null) {
                 throw new ServiceException(400, "Error: missing move");
             }
-
             AuthData auth = ServiceHelper.validateAuth(dataAccess, command.getAuthToken());
             GameData game = gameService.getGame(command.getGameID());
-
-            // validate turn + player
             validateMoveTurn(auth.username(), game);
-
             gameService.makeMove(command.getAuthToken(), command.getGameID(), move);
             GameData updated = gameService.getGame(command.getGameID());
-
             broadcast(command.getGameID(), new ServerMessage(updated), null);
             broadcast(command.getGameID(),
                     new ServerMessage(auth.username() + " made a move"),
@@ -275,15 +270,9 @@ public class Server {
             var res = userService.register(req);
             ctx.status(200).result(serializer.toJson(res));
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            if (msg == null || msg.isBlank()) {
-                msg = "Error: Internal Server Error";
-                ctx.status(500).result(serializer.toJson(new ErrorMessage(msg)));
-            } else {
-                ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage(msg)));
-            }
+            handleServiceError(ctx, e, serializer);
         } catch (Exception e) {
-            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            handleGenericError(ctx, e, serializer);
         }
     }
 
@@ -295,15 +284,9 @@ public class Server {
             LoginResult res = userService.login(req);
             ctx.status(200).result(serializer.toJson(res));
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            if (msg == null || msg.isBlank()) {
-                msg = "Error: Internal Server Error";
-                ctx.status(500).result(serializer.toJson(new ErrorMessage(msg)));
-            } else {
-                ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage(msg)));
-            }
+            handleServiceError(ctx, e, serializer);
         } catch (Exception e) {
-            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            handleGenericError(ctx, e, serializer);
         }
     }
 
@@ -314,15 +297,9 @@ public class Server {
             userService.logout(authToken);
             ctx.status(200).result("{}");
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            if (msg == null || msg.isBlank()) {
-                msg = "Error: Internal Server Error";
-                ctx.status(500).result(serializer.toJson(new ErrorMessage(msg)));
-            } else {
-                ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage(msg)));
-            }
+            handleServiceError(ctx, e, serializer);
         } catch (Exception e) {
-            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            handleGenericError(ctx, e, serializer);
         }
     }
 
@@ -333,15 +310,9 @@ public class Server {
             ListGamesResult res = gameService.listGames(authToken);
             ctx.status(200).result(serializer.toJson(res));
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            if (msg == null || msg.isBlank()) {
-                msg = "Error: Internal Server Error";
-                ctx.status(500).result(serializer.toJson(new ErrorMessage(msg)));
-            } else {
-                ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage(msg)));
-            }
+            handleServiceError(ctx, e, serializer);
         } catch (Exception e) {
-            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            handleGenericError(ctx, e, serializer);
         }
     }
 
@@ -351,17 +322,11 @@ public class Server {
             var authToken = ctx.header("authorization");
             var req = serializer.fromJson(ctx.body(), CreateGameRequest.class);
             CreateGameResult res = gameService.createGame(req.gameName(), authToken);
-            ctx.status(200).result(serializer.toJson((res)));
+            ctx.status(200).result(serializer.toJson(res));
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            if (msg == null || msg.isBlank()) {
-                msg = "Error: Internal Server Error";
-                ctx.status(500).result(serializer.toJson(new ErrorMessage(msg)));
-            } else {
-                ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage(msg)));
-            }
+            handleServiceError(ctx, e, serializer);
         } catch (Exception e) {
-            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            handleGenericError(ctx, e, serializer);
         }
     }
 
@@ -373,16 +338,24 @@ public class Server {
             gameService.joinGame(authToken, req.playerColor(), req.gameID());
             ctx.status(200).result("{}");
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            if (msg == null || msg.isBlank()) {
-                msg = "Error: Internal Server Error";
-                ctx.status(500).result(serializer.toJson(new ErrorMessage(msg)));
-            } else {
-                ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage(msg)));
-            }
+            handleServiceError(ctx, e, serializer);
         } catch (Exception e) {
-            ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
+            handleGenericError(ctx, e, serializer);
         }
+    }
+
+    private void handleServiceError(Context ctx, ServiceException e, Gson serializer) {
+        String msg = e.getMessage();
+        if (msg == null || msg.isBlank()) {
+            msg = "Error: Internal Server Error";
+            ctx.status(500).result(serializer.toJson(new ErrorMessage(msg)));
+        } else {
+            ctx.status(e.getStatusCode()).result(serializer.toJson(new ErrorMessage(msg)));
+        }
+    }
+
+    private void handleGenericError(Context ctx, Exception e, Gson serializer) {
+        ctx.status(500).result(serializer.toJson(new ErrorMessage("Error: " + e.getMessage())));
     }
 
     public int run(int desiredPort) {
